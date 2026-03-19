@@ -6,3 +6,5 @@ python-multipart
 passlib[bcrypt]
 python-jose[cryptography]
 email-validator
+requests
+python-dotenv
