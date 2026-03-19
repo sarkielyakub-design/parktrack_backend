@@ -12,15 +12,6 @@ from app.routers.tracking_router import router as tracking_router
 from app.routers.driver_router import router as driver_router
 
 from app.utils.hashing import get_password_hash
-from fastapi.middleware.cors import CORSMiddleware
-
-app.add_middleware(
-    CORSMiddleware,
-    allow_origins=["*"],
-    allow_credentials=True,
-    allow_methods=["*"],
-    allow_headers=["*"],
-)
 
 
 # =========================
