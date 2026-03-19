@@ -2,6 +2,6 @@ fastapi
 uvicorn
 sqlalchemy
 pydantic
+python-multipart
 passlib
-python-multiple
-passlib[bcrypt]
+bcrypt
