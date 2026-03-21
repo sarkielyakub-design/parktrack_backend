@@ -11,3 +11,4 @@ psycopg2-binary
 qrcode
 Pillow
 reportlab
+python-barcode
