@@ -10,6 +10,7 @@ from app.routers.auth_router import router as auth_router
 from app.routers.shipment_router import router as shipment_router
 from app.routers.tracking_router import router as tracking_router
 from app.routers.driver_router import router as driver_router
+from fastapi.staticfiles import StaticFiles
 
 from app.utils.hashing import get_password_hash
 
@@ -62,7 +63,7 @@ app = FastAPI(
     title="ParkTrack API",
     version="0.1.0"
 )
-
+app.mount("/qr", StaticFiles(directory="qr_codes"), name="qr")
 
 # =========================
 # CORS

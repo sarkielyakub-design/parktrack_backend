@@ -1,7 +1,7 @@
 from fastapi import APIRouter, Depends, HTTPException, Body
 from sqlalchemy.orm import Session
 from pydantic import BaseModel
-
+from app.utils.qr_generator import generate_qr
 import random
 import string
 from datetime import datetime
@@ -130,7 +130,23 @@ def create_shipment(
         "tracking_id": tracking_id,
         "otp": otp,
     }
+qr_data = f"""
+Tracking: {shipment.tracking_number}
+Sender: {shipment.sender_name}
+Receiver: {shipment.receiver_name}
+Phone: {shipment.receiver_phone}
+Destination: {shipment.destination}
+"""
 
+qr_path = generate_qr(
+    qr_data,
+    shipment.tracking_number
+)
+
+shipment.qr_code = qr_path
+
+db.commit()
+db.refresh(shipment)
 
 # =========================
 # UPDATE
@@ -405,3 +421,15 @@ def save_signature(
     db.commit()
 
     return {"msg": "signature saved"}
+@router.get("/shipment/{shipment_id}/label")
+def get_label(shipment_id: int, db: Session = Depends(get_db)):
+
+    shipment = db.query(Shipment).get(shipment_id)
+
+    if not shipment:
+        return {"error": "Not found"}
+
+    return {
+        "tracking": shipment.tracking_number,
+        "qr": shipment.qr_code
+    }

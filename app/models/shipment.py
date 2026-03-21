@@ -11,3 +11,4 @@ class Shipment(Base):
     origin = Column(String)
     destination = Column(String)
     status = Column(String)
+    qr_code = Column(String, nullable=True)
