@@ -6,7 +6,8 @@ import random
 import string
 from datetime import datetime
 import requests
-
+from app.utils.label_generator import generate_label
+from app.utils.barcode_generator import generate_barcode
 from app.database.database import get_db
 
 from app.models.models import (
@@ -80,7 +81,6 @@ def send_whatsapp(phone, message):
 # =========================
 # CREATE
 # =========================
-
 @router.post("/create")
 def create_shipment(
     data: dict = Body(...),
@@ -116,6 +116,7 @@ def create_shipment(
 
 
     # ✅ CREATE HISTORY
+
     history = ShipmentHistory(
         shipment_id=shipment.id,
         tracking_id=tracking_id,
@@ -129,7 +130,7 @@ def create_shipment(
     db.commit()
 
 
-    # ✅ QR CODE HERE (INSIDE FUNCTION)
+    # ✅ QR CODE
 
     qr_data = f"""
 Tracking: {shipment.tracking_id}
@@ -145,17 +146,40 @@ To: {shipment.to_city}
         shipment.tracking_id
     )
 
+
+    # ✅ BARCODE
+
+    barcode_path = generate_barcode(
+        shipment.tracking_id
+    )
+
+
+    # ✅ LABEL PDF
+
+    label_path = generate_label(
+        shipment,
+        qr_path,
+        barcode_path
+    )
+
+
+    # ✅ SAVE FILES
+
     shipment.qr_code = qr_path
+    shipment.label_pdf = label_path
+
     db.commit()
     db.refresh(shipment)
 
+
+    # ✅ RETURN
 
     return {
         "tracking_id": tracking_id,
         "otp": otp,
         "qr": qr_path,
+        "label": label_path,
     }
-
 # =========================
 # UPDATE
 # =========================
