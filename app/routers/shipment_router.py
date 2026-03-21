@@ -114,6 +114,8 @@ def create_shipment(
     db.commit()
     db.refresh(shipment)
 
+
+    # ✅ CREATE HISTORY
     history = ShipmentHistory(
         shipment_id=shipment.id,
         tracking_id=tracking_id,
@@ -126,27 +128,33 @@ def create_shipment(
     db.add(history)
     db.commit()
 
-    return {
-        "tracking_id": tracking_id,
-        "otp": otp,
-    }
-qr_data = f"""
-Tracking: {shipment.tracking_number}
+
+    # ✅ QR CODE HERE (INSIDE FUNCTION)
+
+    qr_data = f"""
+Tracking: {shipment.tracking_id}
 Sender: {shipment.sender_name}
 Receiver: {shipment.receiver_name}
 Phone: {shipment.receiver_phone}
-Destination: {shipment.destination}
+From: {shipment.from_city}
+To: {shipment.to_city}
 """
 
-qr_path = generate_qr(
-    qr_data,
-    shipment.tracking_number
-)
+    qr_path = generate_qr(
+        qr_data,
+        shipment.tracking_id
+    )
 
-shipment.qr_code = qr_path
+    shipment.qr_code = qr_path
+    db.commit()
+    db.refresh(shipment)
 
-db.commit()
-db.refresh(shipment)
+
+    return {
+        "tracking_id": tracking_id,
+        "otp": otp,
+        "qr": qr_path,
+    }
 
 # =========================
 # UPDATE
