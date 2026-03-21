@@ -85,6 +85,7 @@ def send_whatsapp(phone, message):
 # =========================
 # CREATE
 # =========================@router.post("/create")
+@router.post("/create")
 def create_shipment(
     data: dict = Body(...),
     db: Session = Depends(get_db),
@@ -117,9 +118,6 @@ def create_shipment(
     db.commit()
     db.refresh(shipment)
 
-
-    # ✅ CREATE HISTORY
-
     history = ShipmentHistory(
         shipment_id=shipment.id,
         tracking_id=tracking_id,
@@ -131,9 +129,6 @@ def create_shipment(
 
     db.add(history)
     db.commit()
-
-
-    # ✅ QR CODE
 
     qr_data = f"""
 Tracking: {shipment.tracking_id}
@@ -149,15 +144,9 @@ To: {shipment.to_city}
         shipment.tracking_id
     )
 
-
-    # ✅ BARCODE
-
     barcode_path = generate_barcode(
         shipment.tracking_id
     )
-
-
-    # ✅ LABEL PDF
 
     label_path = generate_label(
         shipment,
@@ -165,18 +154,12 @@ To: {shipment.to_city}
         barcode_path
     )
 
-
-    # ✅ SAVE FILES TO DB
-
     shipment.qr_code = qr_path
     shipment.barcode = barcode_path
     shipment.label_pdf = label_path
 
     db.commit()
     db.refresh(shipment)
-
-
-    # ✅ RETURN
 
     return {
         "tracking_id": tracking_id,
