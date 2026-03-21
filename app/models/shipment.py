@@ -1,6 +1,7 @@
 from sqlalchemy import Column, Integer, String
 from app.database.database import Base
 from sqlalchemy import Column, String, Float, DateTime
+from sqlalchemy import Column, String, Float, Boolean
 
 class Shipment(Base):
     __tablename__ = "shipments"
@@ -22,5 +23,7 @@ class Shipment(Base):
     confirmed_by = Column(String, nullable=True)
     delivered_at = Column(DateTime, nullable=True)
     price = Column(Float, default=0)
+    price = Column(Float, default=0)
+    payment_ref = Column(String, nullable=True)
     payment_status = Column(String, default="pending")
     payment_method = Column(String, default="")
