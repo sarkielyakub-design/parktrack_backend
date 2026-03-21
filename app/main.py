@@ -66,6 +66,8 @@ app = FastAPI(
 app.mount("/qr", StaticFiles(directory="qr_codes"), name="qr")
 app.mount("/labels", StaticFiles(directory="labels"), name="labels")
 app.mount("/barcodes", StaticFiles(directory="barcodes"), name="barcodes")
+app.mount("/proof", StaticFiles(directory="proof"), name="proof")
+app.mount("/sign", StaticFiles(directory="sign"), name="sign")
 
 # =========================
 # CORS

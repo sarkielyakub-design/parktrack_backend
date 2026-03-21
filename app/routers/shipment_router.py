@@ -9,6 +9,10 @@ import requests
 from app.utils.label_generator import generate_label
 from app.utils.barcode_generator import generate_barcode
 from app.database.database import get_db
+from fastapi import UploadFile, File, Form
+import shutil
+import os
+from datetime import datetime
 
 from app.models.models import (
     Shipment,
@@ -518,3 +522,71 @@ def confirm_by_scan(
         "msg": "Delivered",
         "tracking_id": tracking_id,
     }
+@router.post("/confirm/proof")
+def confirm_with_proof(
+
+    tracking_id: str = Form(...),
+    otp: str = Form(...),
+    driver: str = Form(...),
+
+    lat: float = Form(...),
+    lng: float = Form(...),
+
+    photo: UploadFile = File(...),
+    sign: UploadFile = File(...),
+
+    db: Session = Depends(get_db),
+
+):
+
+    shipment = db.query(Shipment).filter(
+        Shipment.tracking_id == tracking_id
+    ).first()
+
+    if not shipment:
+        raise HTTPException(404)
+
+    if shipment.otp != otp:
+        raise HTTPException(400, "Wrong OTP")
+
+    # ---------- save photo ----------
+
+    os.makedirs("proof", exist_ok=True)
+
+    photo_path = f"proof/{tracking_id}.jpg"
+
+    with open(photo_path, "wb") as f:
+        shutil.copyfileobj(
+            photo.file,
+            f,
+        )
+
+    # ---------- save sign ----------
+
+    os.makedirs("sign", exist_ok=True)
+
+    sign_path = f"sign/{tracking_id}.png"
+
+    with open(sign_path, "wb") as f:
+        shutil.copyfileobj(
+            sign.file,
+            f,
+        )
+
+    # ---------- update ----------
+
+    shipment.status = "delivered"
+
+    shipment.proof_photo = photo_path
+    shipment.proof_sign = sign_path
+
+    shipment.delivered_lat = lat
+    shipment.delivered_lng = lng
+
+    shipment.confirmed_by = driver
+    shipment.delivered_at = datetime.utcnow()
+
+    db.commit()
+    db.refresh(shipment)
+
+    return {"msg": "Delivered"}
