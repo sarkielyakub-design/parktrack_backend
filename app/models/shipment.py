@@ -21,3 +21,6 @@ class Shipment(Base):
     delivered_lng = Column(Float, nullable=True)
     confirmed_by = Column(String, nullable=True)
     delivered_at = Column(DateTime, nullable=True)
+    price = Column(Float, default=0)
+    payment_status = Column(String, default="pending")
+    payment_method = Column(String, default="")

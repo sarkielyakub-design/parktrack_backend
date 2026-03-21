@@ -14,6 +14,7 @@ import os
 import barcode
 from barcode.writer import ImageWriter
 from fastapi.staticfiles import StaticFiles
+from app.routers.payment_router import router as payment_router
 
 from app.utils.hashing import get_password_hash
 
@@ -78,7 +79,7 @@ app.mount("/labels", StaticFiles(directory="labels"), name="labels")
 app.mount("/barcodes", StaticFiles(directory="barcodes"), name="barcodes")
 app.mount("/proof", StaticFiles(directory="proof"), name="proof")
 app.mount("/sign", StaticFiles(directory="sign"), name="sign")
-
+app.include_router(payment_router)
 # =========================
 # CORS
 # =========================

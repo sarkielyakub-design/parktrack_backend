@@ -111,6 +111,8 @@ def create_shipment(
 
         note=data.get("note"),
 
+        price=data.get("price", 0),
+
         otp=otp,
     )
 
@@ -167,6 +169,7 @@ To: {shipment.to_city}
         "qr": qr_path,
         "barcode": barcode_path,
         "label": label_path,
+        "price": shipment.price,
     }
 # =========================
 # UPDATE
@@ -711,4 +714,61 @@ def confirm_pro(
         "tracking": tracking_id,
         "photo": photo_path,
         "sign": sign_path,
+    }
+@router.get("/timeline/{tracking_id}")
+def timeline(
+    tracking_id: str,
+    db: Session = Depends(get_db),
+):
+
+    history = db.query(ShipmentHistory).filter(
+        ShipmentHistory.tracking_id == tracking_id
+    ).order_by(
+        ShipmentHistory.id.desc()
+    ).all()
+
+    result = []
+
+    for h in history:
+
+        result.append({
+
+            "status": h.status,
+            "location": h.location,
+            "lat": h.lat,
+            "lng": h.lng,
+            "time": str(h.created_at),
+
+        })
+
+    return result
+@router.get("/stats")
+def stats(
+    db: Session = Depends(get_db),
+):
+
+    total = db.query(Shipment).count()
+
+    created = db.query(Shipment).filter(
+        Shipment.status == "created"
+    ).count()
+
+    transit = db.query(Shipment).filter(
+        Shipment.status == "transit"
+    ).count()
+
+    delivered = db.query(Shipment).filter(
+        Shipment.status == "delivered"
+    ).count()
+
+    drivers = db.query(Driver).count()
+
+    return {
+
+        "total": total,
+        "created": created,
+        "transit": transit,
+        "delivered": delivered,
+        "drivers": drivers,
+
     }
