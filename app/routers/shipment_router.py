@@ -598,3 +598,44 @@ def delete_shipment(
     db.commit()
 
     return {"msg": "deleted"}
+@router.post("/confirm-by-qr")
+def confirm_by_qr(
+    data: dict = Body(...),
+    db: Session = Depends(get_db),
+):
+
+    tracking_id = data.get("tracking_id")
+    otp = data.get("otp")
+
+    shipment = db.query(Shipment).filter(
+        Shipment.tracking_id == tracking_id
+    ).first()
+
+    if not shipment:
+        return {"msg": "Shipment not found"}
+
+    if shipment.otp != otp:
+        return {"msg": "Wrong OTP"}
+
+    shipment.status = "delivered"
+    shipment.delivered = 1
+    shipment.delivered_at = datetime.utcnow()
+
+    db.commit()
+    db.refresh(shipment)
+
+    # ✅ history
+    history = ShipmentHistory(
+        shipment_id=shipment.id,
+        tracking_id=tracking_id,
+        status="delivered",
+        location=shipment.location,
+    )
+
+    db.add(history)
+    db.commit()
+
+    return {
+        "msg": "Delivered",
+        "tracking": tracking_id,
+    }
