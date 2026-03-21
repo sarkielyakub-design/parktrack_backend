@@ -1,11 +1,10 @@
-from reportlab.lib.pagesizes import A6
-from reportlab.pdfgen import canvas
 import os
 
+from reportlab.lib.pagesizes import mm
+from reportlab.lib.colors import yellow, black
+from reportlab.pdfgen import canvas
 
 LABEL_FOLDER = "labels"
-
-LOGO_PATH = "assets/logo.png"
 
 os.makedirs(LABEL_FOLDER, exist_ok=True)
 
@@ -20,131 +19,154 @@ def generate_label(
 
     c = canvas.Canvas(
         file_path,
-        pagesize=A6
+        pagesize=(100 * mm, 150 * mm),
     )
 
-    # ---------- LOGO ----------
+    width = 100 * mm
+    height = 150 * mm
 
-    if os.path.exists(LOGO_PATH):
+    # ================= BACKGROUND =================
 
-        c.drawImage(
-            LOGO_PATH,
-            10,
-            380,
-            width=40,
-            height=40,
-        )
-
-    # ---------- HEADER ----------
-
-    c.setFont("Helvetica-Bold", 14)
-
-    c.drawString(
-        60,
-        400,
-        "ZTECHTRACKIA"
+    c.setFillColor(yellow)
+    c.rect(
+        0,
+        height - 40,
+        width,
+        40,
+        fill=1,
+        stroke=0,
     )
 
-    c.setFont("Helvetica", 9)
+    # ================= TITLE =================
 
-    c.drawString(
-        60,
-        385,
-        "Courier Delivery Label"
-    )
+    c.setFillColor(black)
 
-    # ---------- TRACKING ----------
-
-    c.setFont("Helvetica-Bold", 12)
-
-    c.drawString(
-        10,
-        360,
-        f"Tracking: {shipment.tracking_id}"
-    )
-
-    # ---------- SENDER ----------
-
-    c.setFont("Helvetica", 9)
-
-    c.drawString(
-        10,
-        340,
-        f"Sender: {shipment.sender_name}"
+    c.setFont(
+        "Helvetica-Bold",
+        14,
     )
 
     c.drawString(
         10,
-        325,
-        f"Phone: {shipment.sender_phone}"
+        height - 25,
+        "ZTECHTRACKIA EXPRESS",
     )
 
-    # ---------- RECEIVER ----------
+    # ================= TRACKING BIG =================
 
-    c.drawString(
-        10,
-        305,
-        f"Receiver: {shipment.receiver_name}"
-    )
-
-    c.drawString(
-        10,
-        290,
-        f"Phone: {shipment.receiver_phone}"
-    )
-
-    # ---------- ROUTE ----------
-
-    c.drawString(
-        10,
-        270,
-        f"From: {shipment.from_city}"
+    c.setFont(
+        "Helvetica-Bold",
+        18,
     )
 
     c.drawString(
         10,
-        255,
-        f"To: {shipment.to_city}"
+        height - 60,
+        shipment.tracking_id,
     )
 
-    # ---------- QR ----------
+    y = height - 80
 
-    if qr_path:
+    # ================= FROM / TO =================
 
-        c.drawImage(
-            qr_path,
-            170,
-            300,
-            width=100,
-            height=100,
-        )
+    c.setFont(
+        "Helvetica",
+        10,
+    )
 
-    # ---------- BARCODE ----------
+    c.drawString(
+        10,
+        y,
+        f"FROM: {shipment.from_city}",
+    )
 
-    if barcode_path:
+    y -= 15
+
+    c.drawString(
+        10,
+        y,
+        f"TO: {shipment.to_city}",
+    )
+
+    y -= 20
+
+    # ================= RECEIVER =================
+
+    c.setFont(
+        "Helvetica-Bold",
+        11,
+    )
+
+    c.drawString(
+        10,
+        y,
+        f"Receiver: {shipment.receiver_name}",
+    )
+
+    y -= 15
+
+    c.setFont(
+        "Helvetica",
+        10,
+    )
+
+    c.drawString(
+        10,
+        y,
+        f"Phone: {shipment.receiver_phone}",
+    )
+
+    y -= 20
+
+    # ================= SENDER =================
+
+    c.drawString(
+        10,
+        y,
+        f"Sender: {shipment.sender_name}",
+    )
+
+    y -= 25
+
+    # ================= BARCODE =================
+
+    if os.path.exists(barcode_path):
 
         c.drawImage(
             barcode_path,
-            20,
-            200,
-            width=240,
+            10,
+            y - 60,
+            width=250,
             height=60,
         )
 
-    # ---------- FOOTER ----------
+    y -= 70
 
-    c.setFont("Helvetica", 8)
+    # ================= QR =================
 
-    c.drawString(
-        10,
-        180,
-        "Handle with care"
+    if os.path.exists(qr_path):
+
+        c.drawImage(
+            qr_path,
+            width - 90,
+            y - 80,
+            width=80,
+            height=80,
+        )
+
+    y -= 90
+
+    # ================= FOOTER =================
+
+    c.setFont(
+        "Helvetica",
+        8,
     )
 
     c.drawString(
         10,
-        165,
-        "ZtechTrackia Delivery System"
+        y,
+        "Scan barcode to track shipment",
     )
 
     c.save()

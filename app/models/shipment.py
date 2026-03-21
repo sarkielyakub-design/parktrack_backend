@@ -12,6 +12,7 @@ class Shipment(Base):
     origin = Column(String)
     destination = Column(String)
     status = Column(String)
+    barcode = Column(String, nullable=True)
     qr_code = Column(String, nullable=True)
     label_pdf = Column(String, nullable=True)
     proof_photo = Column(String, nullable=True)
