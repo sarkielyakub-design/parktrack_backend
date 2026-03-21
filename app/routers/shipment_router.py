@@ -482,3 +482,39 @@ def track_by_barcode(
         )
 
     return shipment
+@router.post("/confirm/by-scan")
+def confirm_by_scan(
+    data: dict = Body(...),
+    db: Session = Depends(get_db),
+):
+
+    tracking_id = data.get("tracking_id")
+    otp = data.get("otp")
+
+    shipment = db.query(Shipment).filter(
+        Shipment.tracking_id == tracking_id
+    ).first()
+
+    if not shipment:
+        raise HTTPException(
+            status_code=404,
+            detail="Shipment not found"
+        )
+
+    if shipment.otp != otp:
+        raise HTTPException(
+            status_code=400,
+            detail="Wrong OTP"
+        )
+
+    shipment.status = "delivered"
+    shipment.delivered = True
+    shipment.otp_verified = True
+
+    db.commit()
+    db.refresh(shipment)
+
+    return {
+        "msg": "Delivered",
+        "tracking_id": tracking_id,
+    }
