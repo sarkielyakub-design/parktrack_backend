@@ -574,3 +574,20 @@ def confirm_with_proof(
     db.refresh(shipment)
 
     return {"msg": "Delivered"}
+@router.delete("/delete/{tracking_id}")
+def delete_shipment(
+    tracking_id: str,
+    db: Session = Depends(get_db),
+):
+
+    s = db.query(Shipment).filter(
+        Shipment.tracking_id == tracking_id
+    ).first()
+
+    if not s:
+        return {"msg": "not found"}
+
+    db.delete(s)
+    db.commit()
+
+    return {"msg": "deleted"}
