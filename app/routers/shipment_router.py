@@ -639,3 +639,76 @@ def confirm_by_qr(
         "msg": "Delivered",
         "tracking": tracking_id,
     }
+@router.post("/confirm/pro")
+def confirm_pro(
+    tracking_id: str = Form(...),
+    otp: str = Form(...),
+    driver: str = Form(...),
+    lat: str = Form(...),
+    lng: str = Form(...),
+
+    photo: UploadFile = File(...),
+    sign: UploadFile = File(...),
+
+    db: Session = Depends(get_db),
+):
+
+    shipment = db.query(Shipment).filter(
+        Shipment.tracking_id == tracking_id
+    ).first()
+
+    if not shipment:
+        return {"msg": "not found"}
+
+    if shipment.otp != otp:
+        return {"msg": "wrong otp"}
+
+    # ✅ save photo
+    os.makedirs("proof", exist_ok=True)
+
+    photo_path = f"proof/{tracking_id}.jpg"
+
+    with open(photo_path, "wb") as buffer:
+        shutil.copyfileobj(photo.file, buffer)
+
+    # ✅ save sign
+    os.makedirs("sign", exist_ok=True)
+
+    sign_path = f"sign/{tracking_id}.png"
+
+    with open(sign_path, "wb") as buffer:
+        shutil.copyfileobj(sign.file, buffer)
+
+    # ✅ update shipment
+
+    shipment.status = "delivered"
+    shipment.delivered = 1
+    shipment.confirmed_by = driver
+    shipment.delivered_at = datetime.utcnow()
+
+    shipment.proof_photo = photo_path
+    shipment.signature = sign_path
+
+    db.commit()
+    db.refresh(shipment)
+
+    # ✅ history
+
+    history = ShipmentHistory(
+        shipment_id=shipment.id,
+        tracking_id=tracking_id,
+        status="delivered",
+        location=shipment.location,
+        lat=lat,
+        lng=lng,
+    )
+
+    db.add(history)
+    db.commit()
+
+    return {
+        "msg": "DELIVERED",
+        "tracking": tracking_id,
+        "photo": photo_path,
+        "sign": sign_path,
+    }
