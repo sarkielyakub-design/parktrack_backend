@@ -587,7 +587,14 @@ def delete_shipment(
     if not s:
         return {"msg": "not found"}
 
+    # history
+    db.query(ShipmentHistory).filter(
+        ShipmentHistory.shipment_id == s.id
+    ).delete()
+
+    # delete shipment
     db.delete(s)
+
     db.commit()
 
     return {"msg": "deleted"}
