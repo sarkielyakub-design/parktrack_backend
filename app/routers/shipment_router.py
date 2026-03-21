@@ -465,3 +465,20 @@ def get_label(shipment_id: int, db: Session = Depends(get_db)):
         "tracking": shipment.tracking_number,
         "qr": shipment.qr_code
     }
+@router.get("/barcode/{tracking_id}")
+def track_by_barcode(
+    tracking_id: str,
+    db: Session = Depends(get_db),
+):
+
+    shipment = db.query(Shipment).filter(
+        Shipment.tracking_id == tracking_id
+    ).first()
+
+    if not shipment:
+        raise HTTPException(
+            status_code=404,
+            detail="Not found",
+        )
+
+    return shipment
