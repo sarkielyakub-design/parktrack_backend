@@ -1,3 +1,4 @@
+
 from sqlalchemy import (
     Column,
     Integer,
@@ -5,6 +6,7 @@ from sqlalchemy import (
     Float,
     DateTime,
     ForeignKey,
+    Boolean,
 )
 
 from datetime import datetime
@@ -87,6 +89,14 @@ proof_signature = Column(String, nullable=True)
 proof_qr = Column(String, nullable=True)
 confirmed_by = Column(String, nullable=True)
 delivered_at = Column(DateTime, nullable=True)
+price = Column(Float, default=0)
+
+paid = Column(Boolean, default=False)
+
+payment_method = Column(String, nullable=True)
+
+payment_ref = Column(String, nullable=True)
+
 # ================= HISTORY =================
 
 class ShipmentHistory(Base):
