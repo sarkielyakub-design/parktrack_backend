@@ -2,9 +2,7 @@ from fastapi import APIRouter, Depends, Body
 from sqlalchemy.orm import Session
 
 from app.database.database import get_db
-from app.models.models import Shipment 
 from app.models.shipment import Shipment
-from app.models.models import ShipmentHistory
 
 router = APIRouter(prefix="/payment")
 
@@ -26,10 +24,9 @@ def pay(
     if not s:
         return {"error": "not found"}
 
-    s.paid = True
+    s.payment_status = "paid"
     s.payment_method = method
     s.payment_ref = ref
-    s.payment_status = "paid"
 
     db.commit()
 
@@ -42,7 +39,7 @@ def revenue(db: Session = Depends(get_db)):
     s = db.query(Shipment).all()
 
     total = sum([x.price for x in s])
-    paid = sum([x.price for x in s if x.paid])
+    paid = sum([x.price for x in s if x.payment_status == "paid"])
 
     return {
         "total": total,
