@@ -8,17 +8,18 @@ BASE_DIR = os.getcwd()
 
 def generate_label(shipment, qr_path, barcode_path):
 
-    os.makedirs("labels", exist_ok=True)
+    labels_dir = os.path.join(BASE_DIR, "labels")
+
+    os.makedirs(labels_dir, exist_ok=True)
 
     filename = f"{shipment.tracking_id}.pdf"
 
     file_path = os.path.join(
-        BASE_DIR,
-        "labels",
+        labels_dir,
         filename
     )
 
-    # ✅ FIX PATH CORRECTLY
+    # correct paths
 
     qr_real = os.path.join(
         BASE_DIR,
@@ -30,8 +31,9 @@ def generate_label(shipment, qr_path, barcode_path):
         barcode_path.lstrip("/")
     )
 
-    print("QR PATH:", qr_real)
-    print("BARCODE PATH:", barcode_real)
+    print("SAVE LABEL:", file_path)
+    print("QR:", qr_real)
+    print("BARCODE:", barcode_real)
 
     c = canvas.Canvas(
         file_path,
@@ -46,21 +48,12 @@ def generate_label(shipment, qr_path, barcode_path):
     c.setFillColorRGB(0, 0, 0)
     c.setFont("Helvetica-Bold", 18)
 
-    c.drawString(
-        50,
-        740,
-        "ZTECHTRACKIA EXPRESS"
-    )
+    c.drawString(50, 740, "ZTECHTRACKIA EXPRESS")
 
     # TRACKING
 
     c.setFont("Helvetica-Bold", 22)
-
-    c.drawString(
-        50,
-        680,
-        shipment.tracking_id
-    )
+    c.drawString(50, 680, shipment.tracking_id)
 
     # INFO
 
@@ -72,7 +65,7 @@ def generate_label(shipment, qr_path, barcode_path):
     c.drawString(50, 590, f"Phone: {shipment.receiver_phone}")
     c.drawString(50, 570, f"Sender: {shipment.sender_name}")
 
-    # BARCODE
+    # barcode
 
     if os.path.exists(barcode_real):
 
@@ -84,10 +77,7 @@ def generate_label(shipment, qr_path, barcode_path):
             height=80
         )
 
-    else:
-        print("BARCODE NOT FOUND:", barcode_real)
-
-    # QR
+    # qr
 
     if os.path.exists(qr_real):
 
@@ -99,9 +89,8 @@ def generate_label(shipment, qr_path, barcode_path):
             height=120
         )
 
-    else:
-        print("QR NOT FOUND:", qr_real)
-
     c.save()
+
+    # IMPORTANT
 
     return f"/labels/{filename}"
