@@ -1,99 +1,90 @@
 from reportlab.lib.pagesizes import letter
 from reportlab.pdfgen import canvas
-import os
 
 
-def safe(v):
-    if v is None:
-        return ""
-    return str(v)
+def generate_label(shipment, qr_path, barcode_path):
 
+    filename = f"{shipment.tracking_id}.pdf"
+    path = f"labels/{filename}"
 
-def generate_label(
-    shipment,
-    qr_path,
-    barcode_path,
-):
+    c = canvas.Canvas(path, pagesize=letter)
 
-    os.makedirs("labels", exist_ok=True)
+    # HEADER
+    c.setFillColorRGB(1, 1, 0)
+    c.rect(0, 700, 600, 80, fill=1)
 
-    path = f"labels/{shipment.tracking_id}.pdf"
+    c.setFillColorRGB(0, 0, 0)
+    c.setFont("Helvetica-Bold", 18)
 
-    c = canvas.Canvas(
-        path,
-        pagesize=letter,
+    c.drawString(
+        50,
+        740,
+        "ZTECHTRACKIA EXPRESS"
     )
+
+    # TRACKING BIG
+    c.setFont("Helvetica-Bold", 22)
+
+    c.drawString(
+        50,
+        680,
+        shipment.tracking_id
+    )
+
+    # INFO
 
     c.setFont("Helvetica", 12)
 
     c.drawString(
         50,
-        750,
-        f"Tracking: {safe(shipment.tracking_id)}",
-    )
-
-    c.drawString(
-        50,
-        730,
-        f"Sender: {safe(shipment.sender_name)}",
-    )
-
-    c.drawString(
-        50,
-        710,
-        f"Receiver: {safe(shipment.receiver_name)}",
-    )
-
-    c.drawString(
-        50,
-        690,
-        f"From: {safe(shipment.from_city)}",
-    )
-
-    c.drawString(
-        50,
-        670,
-        f"To: {safe(shipment.to_city)}",
-    )
-
-    c.drawString(
-        50,
         650,
-        f"Price: {safe(shipment.price)}",
+        f"FROM: {shipment.from_city}"
     )
 
     c.drawString(
         50,
         630,
-        f"Status: {safe(shipment.status)}",
+        f"TO: {shipment.to_city}"
+    )
+
+    c.drawString(
+        50,
+        610,
+        f"Receiver: {shipment.receiver_name}"
+    )
+
+    c.drawString(
+        50,
+        590,
+        f"Phone: {shipment.receiver_phone}"
+    )
+
+    c.drawString(
+        50,
+        570,
+        f"Sender: {shipment.sender_name}"
     )
 
     # BARCODE
-    try:
-        if barcode_path:
-            c.drawImage(
-                barcode_path,
-                50,
-                520,
-                width=250,
-                height=80,
-            )
-    except:
-        pass
+
+    c.drawImage(
+        barcode_path,
+        50,
+        480,
+        width=300,
+        height=80
+    )
 
     # QR
-    try:
-        if qr_path:
-            c.drawImage(
-                qr_path,
-                320,
-                520,
-                width=120,
-                height=120,
-            )
-    except:
-        pass
+
+    c.drawImage(
+        qr_path,
+        400,
+        480,
+        width=120,
+        height=120
+    )
 
     c.save()
 
-    return path
+    return f"/labels/{filename}"
