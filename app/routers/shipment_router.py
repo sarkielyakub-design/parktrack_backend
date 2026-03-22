@@ -120,7 +120,7 @@ def create_shipment(
 
         price=data.get("price", 0),
 
-        paid=False,
+       
 
         payment_status="pending",
 
