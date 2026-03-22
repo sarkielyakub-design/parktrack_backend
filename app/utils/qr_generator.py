@@ -6,10 +6,13 @@ def generate_qr(data, tracking):
 
     os.makedirs("qr_codes", exist_ok=True)
 
-    path = f"qr_codes/{tracking}.png"
+    filename = f"{tracking}.png"
+
+    file_path = f"qr_codes/{filename}"
 
     img = qrcode.make(data)
 
-    img.save(path)
+    img.save(file_path)
 
-    return path
+    # ✅ return API URL path
+    return f"/qr/{filename}"
