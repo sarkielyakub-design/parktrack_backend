@@ -1,6 +1,16 @@
 
+from sqlalchemy import (
+    Column,
+    Integer,
+    String,
+    Float,
+    DateTime,
+    ForeignKey,
+    Boolean,
+)
 
 from app.models.shipment import Shipment
+from app.models.models import ShipmentHistory
 
 
 class Shipment(Base):
