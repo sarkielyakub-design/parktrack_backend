@@ -1,8 +1,8 @@
 from fastapi import APIRouter, Depends, Body
 from sqlalchemy.orm import Session
 
-from database import get_db
-from models.shipment_model import Shipment
+from app.database import get_db
+from app.models.shipment_model import Shipment
 
 router = APIRouter(prefix="/payment")
 
