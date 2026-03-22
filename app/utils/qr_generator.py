@@ -14,5 +14,7 @@ def generate_qr(data, tracking):
 
     img.save(file_path)
 
-    # ✅ return API URL path
-    return f"/qr/{filename}"
+    return {
+        "file": file_path,   # for label
+        "url": f"/qr/{filename}"  # for API / Flutter
+    }

@@ -85,7 +85,7 @@ def send_whatsapp(phone, message):
 
 # =========================
 # CREATE
-# =========================@router.post("/create")#
+# =========================
 @router.post("/create")
 def create_shipment(
     data: dict = Body(...),
@@ -98,9 +98,7 @@ def create_shipment(
     shipment = Shipment(
 
         tracking_id=tracking_id,
-
         status="created",
-
         location=data.get("location"),
 
         sender_name=data.get("sender_name"),
@@ -116,14 +114,9 @@ def create_shipment(
 
         otp=otp,
 
-        # ✅ NEW PAYMENT
-
         price=data.get("price", 0),
 
-       
-
         payment_status="pending",
-
         payment_method="",
     )
 
@@ -134,17 +127,11 @@ def create_shipment(
     # ================= HISTORY =================
 
     history = ShipmentHistory(
-
         shipment_id=shipment.id,
-
         tracking_id=tracking_id,
-
         status="created",
-
         location=data.get("location"),
-
         lat=data.get("lat"),
-
         lng=data.get("lng"),
     )
 
@@ -163,10 +150,13 @@ To: {shipment.to_city}
 Price: {shipment.price}
 """
 
-    qr_path = generate_qr(
+    qr = generate_qr(
         qr_data,
         shipment.tracking_id
     )
+
+    qr_file = qr["file"]
+    qr_url = qr["url"]
 
     # ================= BARCODE =================
 
@@ -178,11 +168,11 @@ Price: {shipment.price}
 
     label_path = generate_label(
         shipment,
-        qr_path,
+        qr_file,
         barcode_path
     )
 
-    shipment.qr_code = qr_path
+    shipment.qr_code = qr_url
     shipment.barcode = barcode_path
     shipment.label_pdf = label_path
 
@@ -190,17 +180,11 @@ Price: {shipment.price}
     db.refresh(shipment)
 
     return {
-
         "tracking_id": tracking_id,
-
         "otp": otp,
-
         "price": shipment.price,
-
-        "qr": qr_path,
-
+        "qr": qr_url,
         "barcode": barcode_path,
-
         "label": label_path,
     }
 # =========================
