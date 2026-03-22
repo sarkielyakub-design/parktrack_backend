@@ -18,41 +18,33 @@ def generate_label(shipment, qr_path, barcode_path):
         filename
     )
 
-    # ✅ FIX PATHS (important)
+    # ✅ FIX PATH CORRECTLY
 
     qr_real = os.path.join(
         BASE_DIR,
-        qr_path.replace("/", "")
+        qr_path.lstrip("/")
     )
 
     barcode_real = os.path.join(
         BASE_DIR,
-        barcode_path.replace("/", "")
+        barcode_path.lstrip("/")
     )
+
+    print("QR PATH:", qr_real)
+    print("BARCODE PATH:", barcode_real)
 
     c = canvas.Canvas(
         file_path,
         pagesize=letter
     )
 
-    # ================= HEADER =================
+    # HEADER
 
     c.setFillColorRGB(1, 1, 0)
-
-    c.rect(
-        0,
-        700,
-        600,
-        80,
-        fill=1
-    )
+    c.rect(0, 700, 600, 80, fill=1)
 
     c.setFillColorRGB(0, 0, 0)
-
-    c.setFont(
-        "Helvetica-Bold",
-        18
-    )
+    c.setFont("Helvetica-Bold", 18)
 
     c.drawString(
         50,
@@ -60,12 +52,9 @@ def generate_label(shipment, qr_path, barcode_path):
         "ZTECHTRACKIA EXPRESS"
     )
 
-    # ================= TRACKING =================
+    # TRACKING
 
-    c.setFont(
-        "Helvetica-Bold",
-        22
-    )
+    c.setFont("Helvetica-Bold", 22)
 
     c.drawString(
         50,
@@ -73,12 +62,9 @@ def generate_label(shipment, qr_path, barcode_path):
         shipment.tracking_id
     )
 
-    # ================= INFO =================
+    # INFO
 
-    c.setFont(
-        "Helvetica",
-        12
-    )
+    c.setFont("Helvetica", 12)
 
     c.drawString(50, 650, f"FROM: {shipment.from_city}")
     c.drawString(50, 630, f"TO: {shipment.to_city}")
@@ -86,7 +72,7 @@ def generate_label(shipment, qr_path, barcode_path):
     c.drawString(50, 590, f"Phone: {shipment.receiver_phone}")
     c.drawString(50, 570, f"Sender: {shipment.sender_name}")
 
-    # ================= BARCODE =================
+    # BARCODE
 
     if os.path.exists(barcode_real):
 
@@ -101,7 +87,7 @@ def generate_label(shipment, qr_path, barcode_path):
     else:
         print("BARCODE NOT FOUND:", barcode_real)
 
-    # ================= QR =================
+    # QR
 
     if os.path.exists(qr_real):
 
