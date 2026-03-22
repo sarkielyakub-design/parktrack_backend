@@ -1,5 +1,6 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.staticfiles import StaticFiles
 
 from sqlalchemy.orm import Session
 
@@ -10,20 +11,17 @@ from app.routers.auth_router import router as auth_router
 from app.routers.shipment_router import router as shipment_router
 from app.routers.tracking_router import router as tracking_router
 from app.routers.driver_router import router as driver_router
-import os
-import barcode
-from barcode.writer import ImageWriter
-from fastapi.staticfiles import StaticFiles
 from app.routers.payment_router import router as payment_router
 
 from app.utils.hashing import get_password_hash
+
+import os
 
 
 # =========================
 # CREATE TABLES
 # =========================
 
-Base.metadata.drop_all(bind=engine)
 Base.metadata.create_all(bind=engine)
 
 
@@ -66,21 +64,56 @@ create_admin()
 
 app = FastAPI(
     title="ParkTrack API",
-    version="0.1.0"
+    version="1.0"
 )
-import os
 
-os.makedirs("proof", exist_ok=True)
-os.makedirs("sign", exist_ok=True)
+
+# =========================
+# CREATE FOLDERS (IMPORTANT FOR RENDER)
+# =========================
+
 os.makedirs("labels", exist_ok=True)
 os.makedirs("qr_codes", exist_ok=True)
 os.makedirs("barcodes", exist_ok=True)
-app.mount("/qr", StaticFiles(directory="qr_codes"), name="qr")
-app.mount("/labels", StaticFiles(directory="labels"), name="labels")
-app.mount("/barcodes", StaticFiles(directory="barcodes"), name="barcodes")
-app.mount("/proof", StaticFiles(directory="proof"), name="proof")
-app.mount("/sign", StaticFiles(directory="sign"), name="sign")
-app.include_router(payment_router)
+os.makedirs("proof", exist_ok=True)
+os.makedirs("sign", exist_ok=True)
+
+
+# =========================
+# STATIC FILES
+# =========================
+
+app.mount(
+    "/labels",
+    StaticFiles(directory="labels"),
+    name="labels",
+)
+
+app.mount(
+    "/qr",
+    StaticFiles(directory="qr_codes"),
+    name="qr",
+)
+
+app.mount(
+    "/barcodes",
+    StaticFiles(directory="barcodes"),
+    name="barcodes",
+)
+
+app.mount(
+    "/proof",
+    StaticFiles(directory="proof"),
+    name="proof",
+)
+
+app.mount(
+    "/sign",
+    StaticFiles(directory="sign"),
+    name="sign",
+)
+
+
 # =========================
 # CORS
 # =========================
@@ -98,29 +131,11 @@ app.add_middleware(
 # ROUTERS
 # =========================
 
-app.include_router(
-    auth_router,
-    prefix="/auth",
-    tags=["Auth"]
-)
-
-app.include_router(
-    shipment_router,
-    prefix="/shipment",
-    tags=["Shipment"]
-)
-
-app.include_router(
-    tracking_router,
-    prefix="/tracking",
-    tags=["Tracking"]
-)
-
-app.include_router(
-    driver_router,
-    prefix="/driver",
-    tags=["Driver"]
-)
+app.include_router(auth_router, prefix="/auth")
+app.include_router(shipment_router, prefix="/shipment")
+app.include_router(tracking_router, prefix="/tracking")
+app.include_router(driver_router, prefix="/driver")
+app.include_router(payment_router, prefix="/payment")
 
 
 # =========================
@@ -129,6 +144,4 @@ app.include_router(
 
 @app.get("/")
 def root():
-    return {
-        "msg": "ParkTrack API running"
-    }
+    return {"msg": "ParkTrack API running"}
