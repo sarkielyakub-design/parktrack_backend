@@ -3,6 +3,8 @@ from sqlalchemy.orm import Session
 
 from app.database.database import get_db
 from app.models.models import Shipment 
+from app.models.shipment import Shipment
+from app.models.models import ShipmentHistory
 
 router = APIRouter(prefix="/payment")
 

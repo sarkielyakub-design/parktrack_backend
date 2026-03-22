@@ -6,7 +6,8 @@ from app.models.models import User
 from app.schemas.schema import RegisterRequest, LoginRequest
 from app.utils.hashing import hash_password, verify_password
 from app.utils.jwt_handler import create_access_token
-
+from app.models.shipment import Shipment
+from app.models.models import Driver, ShipmentHistory
 router = APIRouter()
 
 
