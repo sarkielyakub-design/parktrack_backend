@@ -13,9 +13,10 @@ from fastapi import UploadFile, File, Form
 import shutil
 import os
 from datetime import datetime
+from app.models.shipment import Shipment
+
 
 from app.models.models import (
-    Shipment,
     ShipmentHistory,
     Driver,
 )
