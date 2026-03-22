@@ -7,27 +7,61 @@ from app.models.shipment_model import Shipment
 router = APIRouter(prefix="/payment")
 
 
-@router.post("/save")
-def save_payment(
+# ✅ save payment
+
+
+@router.post("/pay")
+def pay(
     data: dict = Body(...),
     db: Session = Depends(get_db),
 ):
 
-    tracking = data.get("tracking_id")
-    amount = data.get("amount")
+    tracking = data["tracking_id"]
+
+    method = data["method"]
+
     ref = data.get("ref")
 
-    shipment = db.query(Shipment).filter(
+    s = db.query(Shipment).filter(
         Shipment.tracking_id == tracking
     ).first()
 
-    if not shipment:
+    if not s:
         return {"error": "not found"}
 
-    shipment.price = amount
-    shipment.paid = True
-    shipment.payment_ref = ref
+    s.paid = True
+
+    s.payment_method = method
+
+    s.payment_ref = ref
 
     db.commit()
 
-    return {"msg": "payment saved"}
+    return {"msg": "paid"}
+
+
+# ✅ revenue
+
+
+@router.get("/revenue")
+def revenue(db: Session = Depends(get_db)):
+
+    s = db.query(Shipment).all()
+
+    total = sum([x.price for x in s])
+
+    paid = sum([x.price for x in s if x.paid])
+
+    unpaid = total - paid
+
+    return {
+
+        "total": total,
+
+        "paid": paid,
+
+        "unpaid": unpaid,
+
+        "count": len(s),
+
+    }
