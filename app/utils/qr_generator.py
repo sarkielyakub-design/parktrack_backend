@@ -1,15 +1,15 @@
 import qrcode
 import os
 
-QR_FOLDER = "qr_codes"
 
-os.makedirs(QR_FOLDER, exist_ok=True)
+def generate_qr(data, tracking):
 
+    os.makedirs("qr_codes", exist_ok=True)
 
-def generate_qr(data: str, filename: str):
-    path = f"{QR_FOLDER}/{filename}.png"
+    path = f"qr_codes/{tracking}.png"
 
     img = qrcode.make(data)
+
     img.save(path)
 
     return path

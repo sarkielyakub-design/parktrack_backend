@@ -1,12 +1,12 @@
+from reportlab.lib.pagesizes import letter
+from reportlab.pdfgen import canvas
 import os
 
-from reportlab.lib.pagesizes import mm
-from reportlab.lib.colors import yellow, black
-from reportlab.pdfgen import canvas
 
-LABEL_FOLDER = "labels"
-
-os.makedirs(LABEL_FOLDER, exist_ok=True)
+def safe(v):
+    if v is None:
+        return ""
+    return str(v)
 
 
 def generate_label(
@@ -15,160 +15,85 @@ def generate_label(
     barcode_path,
 ):
 
-    file_path = f"{LABEL_FOLDER}/{shipment.tracking_id}.pdf"
+    os.makedirs("labels", exist_ok=True)
+
+    path = f"labels/{shipment.tracking_id}.pdf"
 
     c = canvas.Canvas(
-        file_path,
-        pagesize=(100 * mm, 150 * mm),
+        path,
+        pagesize=letter,
     )
 
-    width = 100 * mm
-    height = 150 * mm
+    c.setFont("Helvetica", 12)
 
-    # ================= BACKGROUND =================
-
-    c.setFillColor(yellow)
-    c.rect(
-        0,
-        height - 40,
-        width,
-        40,
-        fill=1,
-        stroke=0,
-    )
-
-    # ================= TITLE =================
-
-    c.setFillColor(black)
-
-    c.setFont(
-        "Helvetica-Bold",
-        14,
+    c.drawString(
+        50,
+        750,
+        f"Tracking: {safe(shipment.tracking_id)}",
     )
 
     c.drawString(
-        10,
-        height - 25,
-        "ZTECHTRACKIA EXPRESS",
-    )
-
-    # ================= TRACKING BIG =================
-
-    c.setFont(
-        "Helvetica-Bold",
-        18,
+        50,
+        730,
+        f"Sender: {safe(shipment.sender_name)}",
     )
 
     c.drawString(
-        10,
-        height - 60,
-        shipment.tracking_id,
-    )
-
-    y = height - 80
-
-    # ================= FROM / TO =================
-
-    c.setFont(
-        "Helvetica",
-        10,
+        50,
+        710,
+        f"Receiver: {safe(shipment.receiver_name)}",
     )
 
     c.drawString(
-        10,
-        y,
-        f"FROM: {shipment.from_city}",
-    )
-
-    y -= 15
-
-    c.drawString(
-        10,
-        y,
-        f"TO: {shipment.to_city}",
-    )
-
-    y -= 20
-
-    # ================= RECEIVER =================
-
-    c.setFont(
-        "Helvetica-Bold",
-        11,
+        50,
+        690,
+        f"From: {safe(shipment.from_city)}",
     )
 
     c.drawString(
-        10,
-        y,
-        f"Receiver: {shipment.receiver_name}",
-    )
-
-    y -= 15
-
-    c.setFont(
-        "Helvetica",
-        10,
+        50,
+        670,
+        f"To: {safe(shipment.to_city)}",
     )
 
     c.drawString(
-        10,
-        y,
-        f"Phone: {shipment.receiver_phone}",
-    )
-
-    y -= 20
-
-    # ================= SENDER =================
-
-    c.drawString(
-        10,
-        y,
-        f"Sender: {shipment.sender_name}",
-    )
-
-    y -= 25
-
-    # ================= BARCODE =================
-
-    if os.path.exists(barcode_path):
-
-        c.drawImage(
-            barcode_path,
-            10,
-            y - 60,
-            width=250,
-            height=60,
-        )
-
-    y -= 70
-
-    # ================= QR =================
-
-    if os.path.exists(qr_path):
-
-        c.drawImage(
-            qr_path,
-            width - 90,
-            y - 80,
-            width=80,
-            height=80,
-        )
-
-    y -= 90
-
-    # ================= FOOTER =================
-
-    c.setFont(
-        "Helvetica",
-        8,
+        50,
+        650,
+        f"Price: {safe(shipment.price)}",
     )
 
     c.drawString(
-        10,
-        y,
-        "Scan barcode to track shipment",
+        50,
+        630,
+        f"Status: {safe(shipment.status)}",
     )
+
+    # BARCODE
+    try:
+        if barcode_path:
+            c.drawImage(
+                barcode_path,
+                50,
+                520,
+                width=250,
+                height=80,
+            )
+    except:
+        pass
+
+    # QR
+    try:
+        if qr_path:
+            c.drawImage(
+                qr_path,
+                320,
+                520,
+                width=120,
+                height=120,
+            )
+    except:
+        pass
 
     c.save()
 
-    return file_path
+    return path

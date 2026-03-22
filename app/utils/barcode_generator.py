@@ -2,22 +2,19 @@ import barcode
 from barcode.writer import ImageWriter
 import os
 
-BAR_FOLDER = "barcodes"
 
-os.makedirs(BAR_FOLDER, exist_ok=True)
+def generate_barcode(tracking):
 
+    os.makedirs("barcodes", exist_ok=True)
 
-def generate_barcode(code):
+    path = f"barcodes/{tracking}"
 
-    path = f"{BAR_FOLDER}/{code}"
-
-    barcode_class = barcode.get_barcode_class("code128")
-
-    my_barcode = barcode_class(
-        code,
-        writer=ImageWriter()
+    code = barcode.get(
+        "code128",
+        tracking,
+        writer=ImageWriter(),
     )
 
-    filename = my_barcode.save(path)
+    filename = code.save(path)
 
     return filename
