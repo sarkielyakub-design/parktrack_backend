@@ -1,9 +1,8 @@
 from fastapi import APIRouter, Depends, Body
 from sqlalchemy.orm import Session
 
-from app.database import get_db
-
-from app.models.shipment_model import Shipment
+from database import get_db
+from models.shipment_model import Shipment
 
 router = APIRouter(prefix="/payment")
 
@@ -18,16 +17,16 @@ def save_payment(
     amount = data.get("amount")
     ref = data.get("ref")
 
-    s = db.query(Shipment).filter(
+    shipment = db.query(Shipment).filter(
         Shipment.tracking_id == tracking
     ).first()
 
-    if not s:
+    if not shipment:
         return {"error": "not found"}
 
-    s.price = amount
-    s.paid = True
-    s.payment_ref = ref
+    shipment.price = amount
+    shipment.paid = True
+    shipment.payment_ref = ref
 
     db.commit()
 
