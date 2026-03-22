@@ -5,13 +5,7 @@ from pydantic import BaseModel
 from app.database.database import get_db
 from app.models.shipment import Shipment
 from app.models.models import ShipmentHistory
-from app.models.models import (
-    Driver,
-    DriverLocation,
-    Shipment,
-    ShipmentHistory,
-)
-
+from app.models.models import Driver, DriverLocation
 router = APIRouter()
 
 
