@@ -84,8 +84,7 @@ def send_whatsapp(phone, message):
 
 # =========================
 # CREATE
-# =========================@router.post("/create")
-@router.post("/create")
+# =========================@router.post("/create"@router.post("/create")
 def create_shipment(
     data: dict = Body(...),
     db: Session = Depends(get_db),
@@ -97,7 +96,9 @@ def create_shipment(
     shipment = Shipment(
 
         tracking_id=tracking_id,
+
         status="created",
+
         location=data.get("location"),
 
         sender_name=data.get("sender_name"),
@@ -111,26 +112,44 @@ def create_shipment(
 
         note=data.get("note"),
 
+        otp=otp,
+
+        # ✅ NEW PAYMENT
+
         price=data.get("price", 0),
 
-        otp=otp,
+        paid=False,
+
+        payment_status="pending",
+
+        payment_method="",
     )
 
     db.add(shipment)
     db.commit()
     db.refresh(shipment)
 
+    # ================= HISTORY =================
+
     history = ShipmentHistory(
+
         shipment_id=shipment.id,
+
         tracking_id=tracking_id,
+
         status="created",
+
         location=data.get("location"),
+
         lat=data.get("lat"),
+
         lng=data.get("lng"),
     )
 
     db.add(history)
     db.commit()
+
+    # ================= QR =================
 
     qr_data = f"""
 Tracking: {shipment.tracking_id}
@@ -139,6 +158,7 @@ Receiver: {shipment.receiver_name}
 Phone: {shipment.receiver_phone}
 From: {shipment.from_city}
 To: {shipment.to_city}
+Price: {shipment.price}
 """
 
     qr_path = generate_qr(
@@ -146,9 +166,13 @@ To: {shipment.to_city}
         shipment.tracking_id
     )
 
+    # ================= BARCODE =================
+
     barcode_path = generate_barcode(
         shipment.tracking_id
     )
+
+    # ================= LABEL =================
 
     label_path = generate_label(
         shipment,
@@ -164,12 +188,18 @@ To: {shipment.to_city}
     db.refresh(shipment)
 
     return {
+
         "tracking_id": tracking_id,
+
         "otp": otp,
-        "qr": qr_path,
-        "barcode": barcode_path,
-        "label": label_path,
+
         "price": shipment.price,
+
+        "qr": qr_path,
+
+        "barcode": barcode_path,
+
+        "label": label_path,
     }
 # =========================
 # UPDATE
@@ -742,33 +772,3 @@ def timeline(
         })
 
     return result
-@router.get("/stats")
-def stats(
-    db: Session = Depends(get_db),
-):
-
-    total = db.query(Shipment).count()
-
-    created = db.query(Shipment).filter(
-        Shipment.status == "created"
-    ).count()
-
-    transit = db.query(Shipment).filter(
-        Shipment.status == "transit"
-    ).count()
-
-    delivered = db.query(Shipment).filter(
-        Shipment.status == "delivered"
-    ).count()
-
-    drivers = db.query(Driver).count()
-
-    return {
-
-        "total": total,
-        "created": created,
-        "transit": transit,
-        "delivered": delivered,
-        "drivers": drivers,
-
-    }
