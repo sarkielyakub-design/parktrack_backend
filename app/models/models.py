@@ -46,19 +46,21 @@ class Driver(Base):
 
 # ================= SHIPMENT =================
 
+
+
+
+
 class Shipment(Base):
 
     __tablename__ = "shipments"
 
-    id = Column(Integer, primary_key=True)
+    id = Column(Integer, primary_key=True, index=True)
 
     tracking_id = Column(String, unique=True)
 
     status = Column(String)
 
     location = Column(String)
-
-    driver_id = Column(Integer, nullable=True)
 
     sender_name = Column(String)
     sender_phone = Column(String)
@@ -69,34 +71,32 @@ class Shipment(Base):
     from_city = Column(String)
     to_city = Column(String)
 
-    note = Column(String, nullable=True)
-
-    # ✅ SECURITY
+    note = Column(String)
 
     otp = Column(String)
 
-    otp_sent = Column(Integer, default=0)
+    qr_code = Column(String, nullable=True)
+    barcode = Column(String, nullable=True)
+    label_pdf = Column(String, nullable=True)
 
-    otp_verified = Column(Integer, default=0)
+    delivered_lat = Column(Float, nullable=True)
+    delivered_lng = Column(Float, nullable=True)
 
-    delivered = Column(Integer, default=0)
+    delivered_at = Column(DateTime, nullable=True)
 
     confirmed_by = Column(String, nullable=True)
 
-    delivered_at = Column(DateTime, nullable=True)
     proof_photo = Column(String, nullable=True)
-proof_signature = Column(String, nullable=True)
-proof_qr = Column(String, nullable=True)
-confirmed_by = Column(String, nullable=True)
-delivered_at = Column(DateTime, nullable=True)
-price = Column(Float, default=0)
+    proof_sign = Column(String, nullable=True)
 
-paid = Column(Boolean, default=False)
+    # ✅ PAYMENT
+    price = Column(Float, default=0)
 
-payment_method = Column(String, nullable=True)
+    payment_status = Column(String, default="pending")
 
-payment_ref = Column(String, nullable=True)
+    payment_method = Column(String, default="")
 
+    payment_ref = Column(String, nullable=True)
 # ================= HISTORY =================
 
 class ShipmentHistory(Base):

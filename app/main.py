@@ -23,6 +23,7 @@ from app.utils.hashing import get_password_hash
 # CREATE TABLES
 # =========================
 
+Base.metadata.drop_all(bind=engine)
 Base.metadata.create_all(bind=engine)
 
 
