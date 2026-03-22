@@ -84,7 +84,8 @@ def send_whatsapp(phone, message):
 
 # =========================
 # CREATE
-# =========================@router.post("/create"@router.post("/create")
+# =========================@router.post("/create")#
+@router.post("/create")
 def create_shipment(
     data: dict = Body(...),
     db: Session = Depends(get_db),
