@@ -2,7 +2,8 @@ from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session
 
 from app.database.database import get_db
-from app.models.models import Shipment, ShipmentHistory
+from app.models.shipment import Shipment
+from app.models.models import ShipmentHistory
 
 router = APIRouter()
 
