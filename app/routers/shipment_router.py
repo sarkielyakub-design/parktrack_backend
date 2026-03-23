@@ -113,7 +113,6 @@ def create_shipment(
         note=data.get("note"),
 
         otp=otp,
-
         price=data.get("price", 0),
 
         payment_status="pending",
@@ -124,7 +123,7 @@ def create_shipment(
     db.commit()
     db.refresh(shipment)
 
-    # ================= HISTORY =================
+    # ---------- HISTORY ----------
 
     history = ShipmentHistory(
         shipment_id=shipment.id,
@@ -138,50 +137,35 @@ def create_shipment(
     db.add(history)
     db.commit()
 
-    # ================= QR =================
+    # ---------- QR ----------
 
-    qr_data = f"""
-Tracking: {shipment.tracking_id}
-Sender: {shipment.sender_name}
-Receiver: {shipment.receiver_name}
-Phone: {shipment.receiver_phone}
-From: {shipment.from_city}
-To: {shipment.to_city}
-Price: {shipment.price}
-"""
+    qr_data = f"{tracking_id}"
 
-    qr = generate_qr(
-        qr_data,
-        shipment.tracking_id
-    )
+    qr = generate_qr(qr_data, tracking_id)
 
-    qr_file = qr["file"]      # file path
-    qr_url = qr["url"]        # /qr/xxx.png
+    qr_file = qr["file"]
 
 
-    # ================= BARCODE =================
+    # ---------- BARCODE ----------
 
-    barcode_file = generate_barcode(
-        shipment.tracking_id
-    )
-
-    # correct URL
-    barcode_url = f"/barcodes/{shipment.tracking_id}.png"
+    barcode_file = generate_barcode(tracking_id)
 
 
-    # ================= LABEL =================
+    # ---------- LABEL ----------
 
     label_file = generate_label(
         shipment,
         qr_file,
-        barcode_file
+        barcode_file,
     )
 
-    # correct URL
-    label_url = f"/labels/{shipment.tracking_id}.pdf"
 
+    # ---------- FORCE CLEAN URL ----------
 
-    # ================= SAVE =================
+    qr_url = "/qr/" + tracking_id + ".png"
+    barcode_url = "/barcodes/" + tracking_id + ".png"
+    label_url = "/labels/" + tracking_id + ".pdf"
+
 
     shipment.qr_code = qr_url
     shipment.barcode = barcode_url
@@ -190,11 +174,8 @@ Price: {shipment.price}
     db.commit()
     db.refresh(shipment)
 
-
-    # ================= RETURN =================
-
     return {
-        "tracking_id": shipment.tracking_id,
+        "tracking_id": tracking_id,
         "qr": qr_url,
         "barcode": barcode_url,
         "label": label_url,
