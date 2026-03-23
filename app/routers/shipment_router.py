@@ -1,13 +1,13 @@
 from fastapi import APIRouter, Depends, HTTPException, Body
 from sqlalchemy.orm import Session
 from pydantic import BaseModel
-from app.utils.qr_generator import generate_qr
+from app.utils.generate_qr import generate_qr
 import random
 import string
 from datetime import datetime
 import requests
-from app.utils.label_generator import generate_label
-from app.utils.barcode_generator import generate_barcode
+from app.utils.generate_label import generate_label
+from app.utils.generate_barcode import generate_barcode
 from app.database.database import get_db
 from fastapi import UploadFile, File, Form
 import shutil
