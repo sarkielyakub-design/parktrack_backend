@@ -1,6 +1,6 @@
-import os
 from reportlab.lib.pagesizes import letter
 from reportlab.pdfgen import canvas
+import os
 
 
 BASE_DIR = os.getcwd()
@@ -8,18 +8,15 @@ BASE_DIR = os.getcwd()
 
 def generate_label(shipment, qr_path, barcode_path):
 
-    labels_dir = os.path.join(BASE_DIR, "labels")
-
-    os.makedirs(labels_dir, exist_ok=True)
+    os.makedirs("labels", exist_ok=True)
 
     filename = f"{shipment.tracking_id}.pdf"
 
     file_path = os.path.join(
-        labels_dir,
+        BASE_DIR,
+        "labels",
         filename
     )
-
-    # correct paths
 
     qr_real = os.path.join(
         BASE_DIR,
@@ -31,66 +28,110 @@ def generate_label(shipment, qr_path, barcode_path):
         barcode_path.lstrip("/")
     )
 
-    print("SAVE LABEL:", file_path)
-    print("QR:", qr_real)
-    print("BARCODE:", barcode_real)
-
     c = canvas.Canvas(
         file_path,
         pagesize=letter
     )
 
-    # HEADER
+    # ================= HEADER =================
 
-    c.setFillColorRGB(1, 1, 0)
-    c.rect(0, 700, 600, 80, fill=1)
+    c.setFillColorRGB(1, 0.85, 0)
+    c.rect(0, 720, 600, 80, fill=1)
 
-    c.setFillColorRGB(0, 0, 0)
-    c.setFont("Helvetica-Bold", 18)
+    c.setFont("Helvetica-Bold", 20)
 
-    c.drawString(50, 740, "ZTECHTRACKIA EXPRESS")
+    c.drawString(
+        40,
+        760,
+        "ZTECHTRACKIA EXPRESS"
+    )
 
-    # TRACKING
+    # ================= TRACKING =================
 
-    c.setFont("Helvetica-Bold", 22)
-    c.drawString(50, 680, shipment.tracking_id)
+    c.setFont("Helvetica-Bold", 26)
 
-    # INFO
+    c.drawString(
+        40,
+        700,
+        shipment.tracking_id
+    )
+
+    # ================= BOX =================
+
+    c.rect(40, 520, 520, 160)
 
     c.setFont("Helvetica", 12)
 
-    c.drawString(50, 650, f"FROM: {shipment.from_city}")
-    c.drawString(50, 630, f"TO: {shipment.to_city}")
-    c.drawString(50, 610, f"Receiver: {shipment.receiver_name}")
-    c.drawString(50, 590, f"Phone: {shipment.receiver_phone}")
-    c.drawString(50, 570, f"Sender: {shipment.sender_name}")
+    c.drawString(
+        50,
+        650,
+        f"FROM: {shipment.from_city}"
+    )
 
-    # barcode
+    c.drawString(
+        50,
+        630,
+        f"TO: {shipment.to_city}"
+    )
+
+    c.drawString(
+        50,
+        610,
+        f"SENDER: {shipment.sender_name}"
+    )
+
+    c.drawString(
+        50,
+        590,
+        f"RECEIVER: {shipment.receiver_name}"
+    )
+
+    c.drawString(
+        50,
+        570,
+        f"PHONE: {shipment.receiver_phone}"
+    )
+
+    c.drawString(
+        50,
+        550,
+        f"PRICE: {shipment.price}"
+    )
+
+    # ================= BARCODE =================
 
     if os.path.exists(barcode_real):
 
         c.drawImage(
             barcode_real,
-            50,
-            480,
-            width=300,
+            60,
+            450,
+            width=400,
             height=80
         )
 
-    # qr
+    # ================= QR =================
 
     if os.path.exists(qr_real):
 
         c.drawImage(
             qr_real,
-            400,
-            480,
-            width=120,
-            height=120
+            470,
+            450,
+            width=90,
+            height=90
         )
 
-    c.save()
+    # ================= FOOTER =================
 
-    # IMPORTANT
+    c.setFont("Helvetica", 10)
+
+    c.drawString(
+        40,
+        420,
+        "Powered by ZTECHTRACKIA Logistics System"
+    )
+
+    c.save()
 
     return f"/labels/{filename}"
