@@ -16,5 +16,5 @@ def generate_qr(data, tracking):
 
     return {
         "file": file_path,   # for label
-        "url": f"/qr/{filename}"  # for API / Flutter
+        "url": f"/qr/{tracking}.png"  # for API / Flutter
     }

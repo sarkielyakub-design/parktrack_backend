@@ -155,8 +155,9 @@ Price: {shipment.price}
         shipment.tracking_id
     )
 
-    qr_file = qr["file"]
-    qr_url = qr["url"]   # /qr/XXX.png
+    qr_file = qr["file"]      # real file path
+    qr_url = qr["url"]        # /qr/XXX.png
+
 
     # ================= BARCODE =================
 
@@ -164,7 +165,9 @@ Price: {shipment.price}
         shipment.tracking_id
     )
 
+    # barcode_file = barcodes/XXX.png
     barcode_url = f"/barcodes/{shipment.tracking_id}.png"
+
 
     # ================= LABEL =================
 
@@ -174,7 +177,9 @@ Price: {shipment.price}
         barcode_file
     )
 
+    # label_file should be /labels/XXX.pdf
     label_url = f"/labels/{shipment.tracking_id}.pdf"
+
 
     # ================= SAVE =================
 
@@ -185,15 +190,25 @@ Price: {shipment.price}
     db.commit()
     db.refresh(shipment)
 
+
     # ================= RETURN =================
+
+    return {
+        "tracking_id": shipment.tracking_id,
+        "otp": otp,
+        "price": shipment.price,
+        "qr": qr_url,
+        "barcode": barcode_url,
+        "label": label_url,
+    }
 
     return {
         "tracking_id": tracking_id,
         "otp": otp,
         "price": shipment.price,
         "qr": qr_url,
-        "barcode": barcode_url,
-        "label": label_url,
+        "barcode": barcode_path,
+        "label": label_path,
     }
 # =========================
 # UPDATE

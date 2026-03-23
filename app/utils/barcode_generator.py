@@ -17,4 +17,4 @@ def generate_barcode(tracking):
 
     filename = code.save(path)
 
-    return filename
+    return f"barcodes/{tracking}.png"
