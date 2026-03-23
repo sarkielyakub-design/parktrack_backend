@@ -95,8 +95,9 @@ def create_shipment(
     tracking_id = generate_tracking()
     otp = generate_otp()
 
-    shipment = Shipment(
+    # ================= CREATE SHIPMENT =================
 
+    shipment = Shipment(
         tracking_id=tracking_id,
         status="created",
         location=data.get("location"),
@@ -123,7 +124,7 @@ def create_shipment(
     db.commit()
     db.refresh(shipment)
 
-    # ---------- HISTORY ----------
+    # ================= HISTORY =================
 
     history = ShipmentHistory(
         shipment_id=shipment.id,
@@ -137,35 +138,38 @@ def create_shipment(
     db.add(history)
     db.commit()
 
-    # ---------- QR ----------
+    # ================= QR =================
 
-    qr_data = f"{tracking_id}"
+    qr_data = f"""
+Tracking: {tracking_id}
+Sender: {shipment.sender_name}
+Receiver: {shipment.receiver_name}
+"""
 
-    qr = generate_qr(qr_data, tracking_id)
-
-    qr_file = qr["file"]
-
-
-    # ---------- BARCODE ----------
-
-    barcode_file = generate_barcode(tracking_id)
-
-
-    # ---------- LABEL ----------
-
-    label_file = generate_label(
-        shipment,
-        qr_file,
-        barcode_file,
+    qr_path = generate_qr(
+        qr_data,
+        tracking_id
     )
 
+    # ================= BARCODE =================
 
-    # ---------- FORCE CLEAN URL ----------
+    barcode_path = generate_barcode(
+        tracking_id
+    )
 
-    qr_url = "/qr/" + tracking_id + ".png"
-    barcode_url = "/barcodes/" + tracking_id + ".png"
-    label_url = "/labels/" + tracking_id + ".pdf"
+    # ================= LABEL =================
 
+    label_path = generate_label(
+        shipment,
+        qr_path,
+        barcode_path,
+    )
+
+    # ================= CLEAN URL =================
+
+    qr_url = f"/qr/{tracking_id}.png"
+    barcode_url = f"/barcodes/{tracking_id}.png"
+    label_url = f"/labels/{tracking_id}.pdf"
 
     shipment.qr_code = qr_url
     shipment.barcode = barcode_url
@@ -173,6 +177,8 @@ def create_shipment(
 
     db.commit()
     db.refresh(shipment)
+
+    # ================= RESPONSE =================
 
     return {
         "tracking_id": tracking_id,

@@ -19,6 +19,19 @@ import os
 
 
 # =========================
+# BASE DIR (IMPORTANT FOR RENDER)
+# =========================
+
+BASE_DIR = os.getcwd()
+
+LABEL_DIR = os.path.join(BASE_DIR, "labels")
+QR_DIR = os.path.join(BASE_DIR, "qr_codes")
+BARCODE_DIR = os.path.join(BASE_DIR, "barcodes")
+PROOF_DIR = os.path.join(BASE_DIR, "proof")
+SIGN_DIR = os.path.join(BASE_DIR, "sign")
+
+
+# =========================
 # CREATE TABLES
 # =========================
 
@@ -64,52 +77,52 @@ create_admin()
 
 app = FastAPI(
     title="ParkTrack API",
-    version="1.0"
+    version="2.0"
 )
 
 
 # =========================
-# CREATE FOLDERS (IMPORTANT FOR RENDER)
+# CREATE FOLDERS (RENDER SAFE)
 # =========================
 
-os.makedirs("labels", exist_ok=True)
-os.makedirs("qr_codes", exist_ok=True)
-os.makedirs("barcodes", exist_ok=True)
-os.makedirs("proof", exist_ok=True)
-os.makedirs("sign", exist_ok=True)
+os.makedirs(LABEL_DIR, exist_ok=True)
+os.makedirs(QR_DIR, exist_ok=True)
+os.makedirs(BARCODE_DIR, exist_ok=True)
+os.makedirs(PROOF_DIR, exist_ok=True)
+os.makedirs(SIGN_DIR, exist_ok=True)
 
 
 # =========================
-# STATIC FILES
+# STATIC FILES (IMPORTANT)
 # =========================
 
 app.mount(
     "/labels",
-    StaticFiles(directory="labels"),
+    StaticFiles(directory=LABEL_DIR),
     name="labels",
 )
 
 app.mount(
     "/qr",
-    StaticFiles(directory="qr_codes"),
+    StaticFiles(directory=QR_DIR),
     name="qr",
 )
 
 app.mount(
     "/barcodes",
-    StaticFiles(directory="barcodes"),
+    StaticFiles(directory=BARCODE_DIR),
     name="barcodes",
 )
 
 app.mount(
     "/proof",
-    StaticFiles(directory="proof"),
+    StaticFiles(directory=PROOF_DIR),
     name="proof",
 )
 
 app.mount(
     "/sign",
-    StaticFiles(directory="sign"),
+    StaticFiles(directory=SIGN_DIR),
     name="sign",
 )
 
