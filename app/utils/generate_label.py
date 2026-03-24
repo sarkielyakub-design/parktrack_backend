@@ -1,5 +1,5 @@
 import os
-from reportlab.lib.pagesizes import letter
+from reportlab.lib.pagesizes import A4
 from reportlab.pdfgen import canvas
 
 BASE_DIR = os.getcwd()
@@ -19,107 +19,110 @@ def generate_label(
         f"{shipment.tracking_id}.pdf"
     )
 
-    c = canvas.Canvas(path, pagesize=letter)
+    c = canvas.Canvas(path, pagesize=A4)
 
-    c.setFont("Helvetica-Bold", 16)
+    width, height = A4
+
+    # ================= HEADER =================
+
+    c.setFont("Helvetica-Bold", 26)
 
     c.drawString(
-        50,
-        750,
+        40,
+        height - 40,
         "ZTECHTRACKIA EXPRESS"
     )
 
-    c.setFont("Helvetica", 12)
-
-    # ================= TRACKING =================
-
-    c.drawString(
-        50,
-        720,
-        f"Tracking: {shipment.tracking_id}"
+    # line
+    c.line(
+        40,
+        height - 50,
+        width - 40,
+        height - 50
     )
 
-    # ================= SENDER =================
+    # ================= TRACKING BIG =================
+
+    c.setFont("Helvetica-Bold", 32)
 
     c.drawString(
-        50,
-        700,
-        f"Sender: {shipment.sender_name}"
+        40,
+        height - 100,
+        shipment.tracking_id
     )
 
-    c.drawString(
-        50,
-        680,
-        f"Sender Phone: {shipment.sender_phone}"
-    )
+    # ================= LEFT INFO =================
 
-    # ================= RECEIVER =================
+    c.setFont("Helvetica", 14)
 
-    c.drawString(
-        50,
-        660,
-        f"Receiver: {shipment.receiver_name}"
-    )
+    y = height - 150
 
-    c.drawString(
-        50,
-        640,
-        f"Receiver Phone: {shipment.receiver_phone}"
-    )
+    c.drawString(40, y, f"Sender: {shipment.sender_name}")
+    y -= 20
 
-    # ================= ROUTE =================
+    c.drawString(40, y, f"Phone: {shipment.sender_phone}")
+    y -= 20
 
-    c.drawString(
-        50,
-        620,
-        f"From: {shipment.from_city}"
-    )
+    c.drawString(40, y, f"Receiver: {shipment.receiver_name}")
+    y -= 20
 
-    c.drawString(
-        50,
-        600,
-        f"To: {shipment.to_city}"
-    )
+    c.drawString(40, y, f"Phone: {shipment.receiver_phone}")
+    y -= 20
 
-    # ================= PRICE =================
+    c.drawString(40, y, f"From: {shipment.from_city}")
+    y -= 20
 
-    c.drawString(
-        50,
-        580,
-        f"Price: {shipment.price}"
-    )
+    c.drawString(40, y, f"To: {shipment.to_city}")
+    y -= 20
 
-    # ================= NOTE =================
+    c.drawString(40, y, f"Price: {shipment.price}")
+    y -= 20
 
-    c.drawString(
-        50,
-        560,
-        f"Note: {shipment.note}"
-    )
+    c.drawString(40, y, f"Note: {shipment.note}")
 
-    # ================= BARCODE =================
-
-    if os.path.exists(barcode_path):
-
-        c.drawImage(
-            barcode_path,
-            50,
-            480,
-            250,
-            80
-        )
-
-    # ================= QR =================
+    # ================= QR RIGHT =================
 
     if os.path.exists(qr_path):
 
         c.drawImage(
             qr_path,
-            320,
-            480,
-            120,
+            width - 200,
+            height - 250,
+            150,
+            150
+        )
+
+    # ================= BIG BARCODE =================
+
+    if os.path.exists(barcode_path):
+
+        c.drawImage(
+            barcode_path,
+            40,
+            300,
+            width - 80,
             120
         )
+
+    # ================= TRACKING AGAIN =================
+
+    c.setFont("Helvetica-Bold", 24)
+
+    c.drawCentredString(
+        width / 2,
+        260,
+        shipment.tracking_id
+    )
+
+    # ================= FOOTER =================
+
+    c.setFont("Helvetica", 12)
+
+    c.drawString(
+        40,
+        200,
+        "Powered by ZTECHTRACKIA Logistics System"
+    )
 
     c.save()
 
