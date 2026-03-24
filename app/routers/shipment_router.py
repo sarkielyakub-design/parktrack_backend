@@ -14,6 +14,7 @@ import shutil
 import os
 from datetime import datetime
 from app.models.shipment import Shipment
+from app.models.driver import Driver
 
 
 
@@ -230,7 +231,7 @@ def update_shipment(
 @router.get("/track/{tracking_id}")
 def track_shipment(
     tracking_id: str,
-    db: Session = Depends(get_db),
+    db: Session = Depends(get_db)
 ):
 
     s = db.query(Shipment).filter(
@@ -240,11 +241,9 @@ def track_shipment(
     if not s:
         return {}
 
-    # ================= DRIVER =================
-
     driver_data = None
 
-    if hasattr(s, "driver_id") and s.driver_id:
+    if s.driver_id:
 
         d = db.query(Driver).filter(
             Driver.id == s.driver_id
@@ -256,33 +255,19 @@ def track_shipment(
                 "phone": d.phone,
             }
 
-    # ================= RETURN =================
-
     return {
 
         "tracking_id": s.tracking_id,
-
         "status": s.status,
 
         "sender_name": s.sender_name,
-
         "receiver_name": s.receiver_name,
-
         "receiver_phone": s.receiver_phone,
 
         "from_city": s.from_city,
-
         "to_city": s.to_city,
 
-        "note": s.note,
-
-        "price": s.price,
-
         "otp": s.otp,
-
-        "confirmed_by": s.confirmed_by,
-
-        "delivered_at": s.delivered_at,
 
         "driver": driver_data,
     }
