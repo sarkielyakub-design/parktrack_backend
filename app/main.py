@@ -14,26 +14,21 @@ from app.routers.driver_router import router as driver_router
 from app.routers.payment_router import router as payment_router
 
 from app.utils.hashing import get_password_hash
-from app.config import (
-    LABEL_DIR,
-    QR_DIR,
-    BARCODE_DIR,
-)
 
 import os
 
 
 # =========================
-# BASE DIR (IMPORTANT FOR RENDER)
+# BASE DIR (SAFE FOR RENDER)
 # =========================
 
-BASE_DIR = os.getcwd()
+BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 
-LABEL_DIR = os.path.join(BASE_DIR, "labels")
-QR_DIR = os.path.join(BASE_DIR, "qr_codes")
-BARCODE_DIR = os.path.join(BASE_DIR, "barcodes")
-PROOF_DIR = os.path.join(BASE_DIR, "proof")
-SIGN_DIR = os.path.join(BASE_DIR, "sign")
+LABEL_DIR = os.path.abspath(os.path.join(BASE_DIR, "..", "labels"))
+QR_DIR = os.path.abspath(os.path.join(BASE_DIR, "..", "qr_codes"))
+BARCODE_DIR = os.path.abspath(os.path.join(BASE_DIR, "..", "barcodes"))
+PROOF_DIR = os.path.abspath(os.path.join(BASE_DIR, "..", "proof"))
+SIGN_DIR = os.path.abspath(os.path.join(BASE_DIR, "..", "sign"))
 
 
 # =========================
@@ -82,12 +77,12 @@ create_admin()
 
 app = FastAPI(
     title="ParkTrack API",
-    version="2.0"
+    version="3.0"
 )
 
 
 # =========================
-# CREATE FOLDERS (RENDER SAFE)
+# CREATE FOLDERS
 # =========================
 
 os.makedirs(LABEL_DIR, exist_ok=True)
@@ -98,7 +93,7 @@ os.makedirs(SIGN_DIR, exist_ok=True)
 
 
 # =========================
-# STATIC FILES (IMPORTANT)
+# STATIC FILES
 # =========================
 
 app.mount(
