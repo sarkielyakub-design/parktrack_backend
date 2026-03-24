@@ -10,9 +10,10 @@ def generate_barcode(tracking):
     folder = os.path.join(BASE_DIR, "barcodes")
     os.makedirs(folder, exist_ok=True)
 
-    filename = tracking
-
-    path = os.path.join(folder, filename)
+    path = os.path.join(
+        folder,
+        tracking
+    )
 
     code = barcode.get(
         "code128",
@@ -20,6 +21,8 @@ def generate_barcode(tracking):
         writer=ImageWriter()
     )
 
-    full_path = code.save(path)
+    full = code.save(path)
 
-    return full_path
+    print("BARCODE SAVED:", full)
+
+    return full

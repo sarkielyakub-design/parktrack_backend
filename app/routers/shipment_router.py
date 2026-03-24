@@ -95,8 +95,6 @@ def create_shipment(
     tracking_id = generate_tracking()
     otp = generate_otp()
 
-    # ================= CREATE SHIPMENT =================
-
     shipment = Shipment(
         tracking_id=tracking_id,
         status="created",
@@ -124,7 +122,7 @@ def create_shipment(
     db.commit()
     db.refresh(shipment)
 
-    # ================= HISTORY =================
+    # HISTORY
 
     history = ShipmentHistory(
         shipment_id=shipment.id,
@@ -138,34 +136,28 @@ def create_shipment(
     db.add(history)
     db.commit()
 
-    # ================= QR =================
+    # QR
 
-    qr_data = f"""
-Tracking: {tracking_id}
-Sender: {shipment.sender_name}
-Receiver: {shipment.receiver_name}
-"""
-
-    qr_path = generate_qr(
-        qr_data,
+    qr_file = generate_qr(
+        tracking_id,
         tracking_id
     )
 
-    # ================= BARCODE =================
+    # BARCODE
 
-    barcode_path = generate_barcode(
+    barcode_file = generate_barcode(
         tracking_id
     )
 
-    # ================= LABEL =================
+    # LABEL
 
-    label_path = generate_label(
+    label_file = generate_label(
         shipment,
-        qr_path,
-        barcode_path,
+        qr_file,
+        barcode_file,
     )
 
-    # ================= CLEAN URL =================
+    # URL
 
     qr_url = f"/qr/{tracking_id}.png"
     barcode_url = f"/barcodes/{tracking_id}.png"
@@ -178,7 +170,9 @@ Receiver: {shipment.receiver_name}
     db.commit()
     db.refresh(shipment)
 
-    # ================= RESPONSE =================
+    print("QR:", qr_file)
+    print("BARCODE:", barcode_file)
+    print("LABEL:", label_file)
 
     return {
         "tracking_id": tracking_id,
