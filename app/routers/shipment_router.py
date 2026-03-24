@@ -16,6 +16,7 @@ from datetime import datetime
 from app.models.shipment import Shipment
 
 
+
 from app.models.models import (
     ShipmentHistory,
     Driver,
@@ -777,3 +778,42 @@ def timeline(
         })
 
     return result
+
+
+
+@router.get("/last")
+def get_last_shipment(db: Session = Depends(get_db)):
+
+    s = db.query(Shipment).order_by(
+        Shipment.id.desc()
+    ).first()
+
+    if not s:
+        return {}
+
+    driver_data = None
+
+    if hasattr(s, "driver_id") and s.driver_id:
+
+        d = db.query(Driver).filter(
+            Driver.id == s.driver_id
+        ).first()
+
+        if d:
+            driver_data = {
+                "name": d.name,
+                "phone": d.phone,
+            }
+
+    return {
+
+        "tracking_id": s.tracking_id,
+
+        "from_city": s.from_city,
+
+        "to_city": s.to_city,
+
+        "status": s.status,
+
+        "driver": driver_data,
+    }
