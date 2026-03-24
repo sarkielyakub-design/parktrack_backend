@@ -17,37 +17,14 @@ def generate_label(
 
     c = canvas.Canvas(path, pagesize=letter)
 
-    c.drawString(
-        50,
-        750,
-        "ZTECHTRACKIA EXPRESS"
-    )
-
-    c.drawString(
-        50,
-        720,
-        shipment.tracking_id
-    )
+    c.drawString(50, 750, "ZTECHTRACKIA EXPRESS")
+    c.drawString(50, 720, shipment.tracking_id)
 
     if os.path.exists(barcode_path):
-
-        c.drawImage(
-            barcode_path,
-            50,
-            600,
-            250,
-            80
-        )
+        c.drawImage(barcode_path, 50, 600, 250, 80)
 
     if os.path.exists(qr_path):
-
-        c.drawImage(
-            qr_path,
-            320,
-            600,
-            120,
-            120
-        )
+        c.drawImage(qr_path, 320, 600, 120, 120)
 
     c.save()
 
