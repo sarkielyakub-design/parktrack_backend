@@ -1,16 +1,12 @@
 import os
 import qrcode
-
-BASE_DIR = os.getcwd()
+from app.config import QR_DIR
 
 
 def generate_qr(data, tracking):
 
-    folder = os.path.join(BASE_DIR, "qr_codes")
-    os.makedirs(folder, exist_ok=True)
-
     path = os.path.join(
-        folder,
+        QR_DIR,
         f"{tracking}.png"
     )
 

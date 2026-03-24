@@ -1,17 +1,13 @@
 import os
 import barcode
 from barcode.writer import ImageWriter
-
-BASE_DIR = os.getcwd()
+from app.config import BARCODE_DIR
 
 
 def generate_barcode(tracking):
 
-    folder = os.path.join(BASE_DIR, "barcodes")
-    os.makedirs(folder, exist_ok=True)
-
     path = os.path.join(
-        folder,
+        BARCODE_DIR,
         tracking
     )
 

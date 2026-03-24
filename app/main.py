@@ -14,6 +14,11 @@ from app.routers.driver_router import router as driver_router
 from app.routers.payment_router import router as payment_router
 
 from app.utils.hashing import get_password_hash
+from app.config import (
+    LABEL_DIR,
+    QR_DIR,
+    BARCODE_DIR,
+)
 
 import os
 
