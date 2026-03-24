@@ -14,7 +14,7 @@ import shutil
 import os
 from datetime import datetime
 from app.models.shipment import Shipment
-from app.models.driver import Driver
+
 
 
 
