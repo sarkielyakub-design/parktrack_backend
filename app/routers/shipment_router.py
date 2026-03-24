@@ -240,8 +240,28 @@ def track_shipment(
     if not s:
         raise HTTPException(404)
 
-    return s
+    driver_data = None
 
+    if s.driver_id:
+
+        d = db.query(Driver).filter(
+            Driver.id == s.driver_id
+        ).first()
+
+        if d:
+
+            driver_data = {
+                "name": d.name,
+                "phone": d.phone,
+            }
+
+    return {
+        "tracking_id": s.tracking_id,
+        "status": s.status,
+        "from_city": s.from_city,
+        "to_city": s.to_city,
+        "driver": driver_data,
+    }
 
 # =========================
 # ALL
