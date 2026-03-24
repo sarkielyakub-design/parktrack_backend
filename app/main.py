@@ -6,6 +6,7 @@ from sqlalchemy.orm import Session
 
 from app.database.database import Base, engine, SessionLocal
 from app.models.models import User
+from sqlalchemy import text
 
 from app.routers.auth_router import router as auth_router
 from app.routers.shipment_router import router as shipment_router
@@ -45,6 +46,22 @@ print("QR_DIR =", QR_DIR)
 # =========================
 
 Base.metadata.create_all(bind=engine)
+
+
+
+# =========================
+# FIX driver_id COLUMN
+# =========================
+
+try:
+    with engine.connect() as conn:
+        conn.execute(text(
+            "ALTER TABLE shipments ADD COLUMN driver_id INTEGER"
+        ))
+        conn.commit()
+        print("driver_id column added")
+except Exception as e:
+    print("driver_id exists or error:", e)
 
 
 # =========================
