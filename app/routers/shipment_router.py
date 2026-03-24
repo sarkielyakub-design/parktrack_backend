@@ -389,7 +389,6 @@ OTP: {s.otp}
     send_whatsapp(s.receiver_phone, message)
 
     return {"msg": "WhatsApp OTP sent"}
-from fastapi import UploadFile, File
 
 
 @router.post("/save-proof/{tracking_id}")
@@ -458,14 +457,19 @@ def save_signature(
 @router.get("/shipment/{shipment_id}/label")
 def get_label(shipment_id: int, db: Session = Depends(get_db)):
 
-    shipment = db.query(Shipment).get(shipment_id)
+    shipment = db.query(Shipment).filter(
+        Shipment.id == shipment_id
+    ).first()
 
     if not shipment:
         return {"error": "Not found"}
 
     return {
-        "tracking": shipment.tracking_number,
-        "qr": shipment.qr_code
+        "id": shipment.id,
+        "tracking_id": shipment.tracking_id,
+        "qr": shipment.qr_code,
+        "barcode": shipment.barcode,
+        "label": shipment.label_pdf,
     }
 @router.get("/barcode/{tracking_id}")
 def track_by_barcode(
