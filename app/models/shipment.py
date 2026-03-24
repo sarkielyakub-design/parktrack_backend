@@ -12,6 +12,7 @@ class Shipment(Base):
 
     status = Column(String)
     location = Column(String)
+    driver_id = Column(Integer, nullable=True)
 
     sender_name = Column(String)
     sender_phone = Column(String)
