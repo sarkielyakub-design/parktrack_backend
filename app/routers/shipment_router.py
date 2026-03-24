@@ -227,11 +227,10 @@ def update_shipment(
 # =========================
 # TRACK
 # =========================
-
 @router.get("/track/{tracking_id}")
 def track_shipment(
     tracking_id: str,
-    db: Session = Depends(get_db),
+    db: Session = Depends(get_db)
 ):
 
     s = db.query(Shipment).filter(
@@ -239,31 +238,44 @@ def track_shipment(
     ).first()
 
     if not s:
-        raise HTTPException(404)
+        return {}
 
     driver_data = None
 
-    if s.driver_id:
+    if hasattr(s, "driver_id") and s.driver_id:
 
         d = db.query(Driver).filter(
             Driver.id == s.driver_id
         ).first()
 
         if d:
-
             driver_data = {
                 "name": d.name,
                 "phone": d.phone,
             }
 
     return {
+
         "tracking_id": s.tracking_id,
+
         "status": s.status,
+
+        "sender_name": s.sender_name,
+
+        "receiver_name": s.receiver_name,
+
+        "receiver_phone": s.receiver_phone,
+
         "from_city": s.from_city,
+
         "to_city": s.to_city,
+
+        "note": s.note,
+
+        "price": s.price,
+
         "driver": driver_data,
     }
-
 # =========================
 # ALL
 # =========================
