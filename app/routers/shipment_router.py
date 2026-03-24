@@ -230,7 +230,7 @@ def update_shipment(
 @router.get("/track/{tracking_id}")
 def track_shipment(
     tracking_id: str,
-    db: Session = Depends(get_db)
+    db: Session = Depends(get_db),
 ):
 
     s = db.query(Shipment).filter(
@@ -239,6 +239,8 @@ def track_shipment(
 
     if not s:
         return {}
+
+    # ================= DRIVER =================
 
     driver_data = None
 
@@ -253,6 +255,8 @@ def track_shipment(
                 "name": d.name,
                 "phone": d.phone,
             }
+
+    # ================= RETURN =================
 
     return {
 
@@ -273,6 +277,12 @@ def track_shipment(
         "note": s.note,
 
         "price": s.price,
+
+        "otp": s.otp,
+
+        "confirmed_by": s.confirmed_by,
+
+        "delivered_at": s.delivered_at,
 
         "driver": driver_data,
     }
