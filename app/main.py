@@ -19,16 +19,25 @@ import os
 
 
 # =========================
-# BASE DIR (SAFE FOR RENDER)
+# BASE DIR (REAL ROOT FOR RENDER)
 # =========================
 
-BASE_DIR = os.path.dirname(os.path.abspath(__file__))
+BASE_DIR = os.path.abspath(
+    os.path.join(
+        os.path.dirname(__file__),
+        ".."
+    )
+)
 
-LABEL_DIR = os.path.abspath(os.path.join(BASE_DIR, "..", "labels"))
-QR_DIR = os.path.abspath(os.path.join(BASE_DIR, "..", "qr_codes"))
-BARCODE_DIR = os.path.abspath(os.path.join(BASE_DIR, "..", "barcodes"))
-PROOF_DIR = os.path.abspath(os.path.join(BASE_DIR, "..", "proof"))
-SIGN_DIR = os.path.abspath(os.path.join(BASE_DIR, "..", "sign"))
+LABEL_DIR = os.path.join(BASE_DIR, "labels")
+QR_DIR = os.path.join(BASE_DIR, "qr_codes")
+BARCODE_DIR = os.path.join(BASE_DIR, "barcodes")
+PROOF_DIR = os.path.join(BASE_DIR, "proof")
+SIGN_DIR = os.path.join(BASE_DIR, "sign")
+
+
+print("BASE_DIR =", BASE_DIR)
+print("QR_DIR =", QR_DIR)
 
 
 # =========================
@@ -77,7 +86,7 @@ create_admin()
 
 app = FastAPI(
     title="ParkTrack API",
-    version="3.0"
+    version="4.0"
 )
 
 
