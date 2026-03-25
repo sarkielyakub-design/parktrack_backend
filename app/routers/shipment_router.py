@@ -202,29 +202,45 @@ def update_shipment(
     if not s:
         raise HTTPException(404)
 
-    s.status = data.get("status")
-    s.location = data.get("location")
+    status = data.get("status")
+    location = data.get("location")
 
-    if s.status == "out for delivery" and not s.otp:
+    lat = data.get("lat")
+    lng = data.get("lng")
+
+    # ✅ AUTO GET LAT LNG
+
+    if not lat or not lng:
+
+        lat, lng = get_lat_lng(location)
+
+    s.status = status
+    s.location = location
+
+    if status == "out for delivery" and not s.otp:
         s.otp = generate_otp()
 
     db.commit()
 
+    # ✅ HISTORY AUTO
+
     history = ShipmentHistory(
         shipment_id=s.id,
         tracking_id=tracking_id,
-        status=s.status,
-        location=s.location,
-        lat=data.get("lat"),
-        lng=data.get("lng"),
+        status=status,
+        location=location,
+        lat=lat,
+        lng=lng,
     )
 
     db.add(history)
     db.commit()
 
-    return {"msg": "updated"}
-
-
+    return {
+        "msg": "updated",
+        "lat": lat,
+        "lng": lng,
+    }
 # =========================
 # TRACK
 # =========================
@@ -824,3 +840,28 @@ def get_last_shipment(db: Session = Depends(get_db)):
 
         "driver": driver_data,
     }
+def get_lat_lng(city):
+
+    try:
+
+        url = "https://nominatim.openstreetmap.org/search"
+
+        params = {
+            "q": city,
+            "format": "json",
+        }
+
+        r = requests.get(url, params=params)
+
+        data = r.json()
+
+        if len(data) == 0:
+            return 0, 0
+
+        lat = float(data[0]["lat"])
+        lng = float(data[0]["lon"])
+
+        return lat, lng
+
+    except:
+        return 0, 0
