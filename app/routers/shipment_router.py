@@ -865,3 +865,127 @@ def get_lat_lng(city):
 
     except:
         return 0, 0
+    
+    
+    @router.get("/available")
+    def available_shipments(
+    db: Session = Depends(get_db),
+):
+
+     shipments = db.query(Shipment).filter(
+        Shipment.driver_id == None
+    ).all()
+
+    return shipments
+@router.post("/take/{tracking_id}")
+def take_shipment(
+    tracking_id: str,
+    driver_id: int = Body(...),
+    db: Session = Depends(get_db),
+):
+
+    s = db.query(Shipment).filter(
+        Shipment.tracking_id == tracking_id
+    ).first()
+
+    if not s:
+        raise HTTPException(404)
+
+    if s.driver_id:
+        return {"msg": "already taken"}
+
+    # assign driver
+
+    s.driver_id = driver_id
+    s.status = "in transit"
+
+    db.commit()
+
+    # history
+
+    history = ShipmentHistory(
+        shipment_id=s.id,
+        tracking_id=s.tracking_id,
+        status="in transit",
+        location=s.from_city,
+        lat=0,
+        lng=0,
+    )
+
+    db.add(history)
+    db.commit()
+
+    return {
+        "msg": "taken",
+        "tracking_id": tracking_id,
+        "driver_id": driver_id,
+    }
+# =========================
+# NEARBY SHIPMENTS
+# =========================
+
+@router.get("/nearby/{driver_id}")
+def nearby_shipments(
+    driver_id: int,
+    db: Session = Depends(get_db),
+):
+
+    shipments = db.query(Shipment).filter(
+        Shipment.driver_id == None,
+        Shipment.status == "created",
+    ).all()
+
+    result = []
+
+    for s in shipments:
+
+        result.append({
+            "tracking_id": s.tracking_id,
+            "from_city": s.from_city,
+            "to_city": s.to_city,
+            "location": s.location,
+        })
+
+    return result
+# =========================
+# TAKE SHIPMENT
+# =========================
+
+@router.put("/take/{tracking_id}/{driver_id}")
+def take_shipment(
+    tracking_id: str,
+    driver_id: int,
+    db: Session = Depends(get_db),
+):
+
+    shipment = db.query(Shipment).filter(
+        Shipment.tracking_id == tracking_id
+    ).first()
+
+    if not shipment:
+        raise HTTPException(404, "Not found")
+
+    shipment.driver_id = driver_id
+    shipment.status = "in transit"
+
+    db.commit()
+
+    # HISTORY
+
+    history = ShipmentHistory(
+        shipment_id=shipment.id,
+        tracking_id=shipment.tracking_id,
+        status="in transit",
+        location=shipment.from_city,
+        lat=0,
+        lng=0,
+    )
+
+    db.add(history)
+    db.commit()
+
+    return {
+        "msg": "taken",
+        "tracking": tracking_id,
+        "driver": driver_id,
+    }
