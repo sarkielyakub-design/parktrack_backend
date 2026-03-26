@@ -3,10 +3,12 @@ from fastapi.middleware.cors import CORSMiddleware
 from fastapi.staticfiles import StaticFiles
 
 from sqlalchemy.orm import Session
+from sqlalchemy import text
+
+import os
 
 from app.database.database import Base, engine, SessionLocal
 from app.models.models import User
-from sqlalchemy import text
 
 from app.routers.auth_router import router as auth_router
 from app.routers.shipment_router import router as shipment_router
@@ -15,7 +17,21 @@ from app.routers.driver_router import router as driver_router
 from app.routers.payment_router import router as payment_router
 
 from app.utils.hashing import get_password_hash
-from fastapi.middleware.cors import CORSMiddleware
+
+
+# =========================
+# CREATE APP FIRST ✅
+# =========================
+
+app = FastAPI(
+    title="ParkTrack API",
+    version="4.0"
+)
+
+
+# =========================
+# CORS (ONLY ONCE)
+# =========================
 
 app.add_middleware(
     CORSMiddleware,
@@ -25,11 +41,9 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-import os
-
 
 # =========================
-# BASE DIR (REAL ROOT FOR RENDER)
+# BASE DIR (RENDER SAFE)
 # =========================
 
 BASE_DIR = os.path.abspath(
@@ -57,16 +71,17 @@ print("QR_DIR =", QR_DIR)
 Base.metadata.create_all(bind=engine)
 
 
-
 # =========================
 # FIX driver_id COLUMN
 # =========================
 
 try:
     with engine.connect() as conn:
-        conn.execute(text(
-            "ALTER TABLE shipments ADD COLUMN driver_id INTEGER"
-        ))
+        conn.execute(
+            text(
+                "ALTER TABLE shipments ADD COLUMN driver_id INTEGER"
+            )
+        )
         conn.commit()
         print("driver_id column added")
 except Exception as e:
@@ -104,16 +119,6 @@ def create_admin():
 
 
 create_admin()
-
-
-# =========================
-# APP
-# =========================
-
-app = FastAPI(
-    title="ParkTrack API",
-    version="4.0"
-)
 
 
 # =========================
@@ -159,19 +164,6 @@ app.mount(
     "/sign",
     StaticFiles(directory=SIGN_DIR),
     name="sign",
-)
-
-
-# =========================
-# CORS
-# =========================
-
-app.add_middleware(
-    CORSMiddleware,
-    allow_origins=["*"],
-    allow_credentials=True,
-    allow_methods=["*"],
-    allow_headers=["*"],
 )
 
 
