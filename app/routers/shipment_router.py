@@ -780,11 +780,39 @@ def timeline(
     db: Session = Depends(get_db),
 ):
 
-    history = db.query(ShipmentHistory).filter(
-        ShipmentHistory.tracking_id == tracking_id
+    # find shipment first
+
+    s = db.query(Shipment).filter(
+        Shipment.tracking_id == tracking_id
+    ).first()
+
+    if not s:
+        return []
+
+
+    # get history using shipment_id (best way)
+
+    history = db.query(
+        ShipmentHistory
+    ).filter(
+        ShipmentHistory.shipment_id == s.id
     ).order_by(
-        ShipmentHistory.id.desc()
+        ShipmentHistory.id.asc()
     ).all()
+
+
+    # fallback if shipment_id not saved
+
+    if not history:
+
+        history = db.query(
+            ShipmentHistory
+        ).filter(
+            ShipmentHistory.tracking_id == tracking_id
+        ).order_by(
+            ShipmentHistory.id.asc()
+        ).all()
+
 
     result = []
 
@@ -794,15 +822,15 @@ def timeline(
 
             "status": h.status,
             "location": h.location,
+
             "lat": h.lat,
             "lng": h.lng,
+
             "time": str(h.created_at),
 
         })
 
     return result
-
-
 
 @router.get("/last")
 def get_last_shipment(db: Session = Depends(get_db)):
