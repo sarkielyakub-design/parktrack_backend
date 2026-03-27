@@ -260,7 +260,6 @@ def track_shipment(
     driver_data = None
 
     if s.driver_id:
-
         d = db.query(Driver).filter(
             Driver.id == s.driver_id
         ).first()
@@ -272,13 +271,18 @@ def track_shipment(
             }
 
     return {
-
         "tracking_id": s.tracking_id,
         "status": s.status,
 
-        "sender_name": s.sender_name,
-        "receiver_name": s.receiver_name,
-        "receiver_phone": s.receiver_phone,
+        # 🔥 FIXED STRUCTURE
+        "sender": {
+            "name": s.sender_name,
+        },
+
+        "receiver": {
+            "name": s.receiver_name,
+            "phone": s.receiver_phone,
+        },
 
         "from_city": s.from_city,
         "to_city": s.to_city,
