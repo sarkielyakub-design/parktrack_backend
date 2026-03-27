@@ -274,7 +274,16 @@ def track_shipment(
         "tracking_id": s.tracking_id,
         "status": s.status,
 
-        # 🔥 FIXED STRUCTURE
+        # =========================
+        # ✅ BACKWARD COMPATIBILITY
+        # =========================
+        "sender_name": s.sender_name,
+        "receiver_name": s.receiver_name,
+        "receiver_phone": s.receiver_phone,
+
+        # =========================
+        # ✅ NEW STRUCTURE (MODERN UI)
+        # =========================
         "sender": {
             "name": s.sender_name,
         },
@@ -284,6 +293,9 @@ def track_shipment(
             "phone": s.receiver_phone,
         },
 
+        # =========================
+        # OTHER DATA
+        # =========================
         "from_city": s.from_city,
         "to_city": s.to_city,
 
