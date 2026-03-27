@@ -1033,3 +1033,31 @@ def take_shipment(
         "tracking": tracking_id,
         "driver": driver_id,
     }
+
+
+@router.post("/driver/location")
+def update_location(data: dict, db: Session = Depends(get_db)):
+
+    tracking_id = data.get("tracking_id")
+    lat = data.get("lat")
+    lng = data.get("lng")
+
+    # save to DB
+    timeline = ShipmentTimeline(
+        tracking_id=tracking_id,
+        lat=lat,
+        lng=lng,
+        status="in transit"
+    )
+
+    db.add(timeline)
+    db.commit()
+
+    # 🔥 SEND REALTIME UPDATE
+    if tracking_id in connections:
+        for ws in connections[tracking_id]:        import json
+        ws.send_text(json.dumps({
+                "lat": lat,
+                "lng": lng,
+            }))
+    return {"msg": "location updated"}

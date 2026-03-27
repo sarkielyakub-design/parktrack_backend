@@ -17,6 +17,8 @@ from app.routers.driver_router import router as driver_router
 from app.routers.payment_router import router as payment_router
 
 from app.utils.hashing import get_password_hash
+from app.websocket.socket import websocket_endpoint
+
 
 
 # =========================
@@ -41,7 +43,7 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-
+app.websocket("/ws/{tracking_id}")(websocket_endpoint)
 # =========================
 # BASE DIR (RENDER SAFE)
 # =========================
