@@ -21,6 +21,7 @@ from app.utils.hashing import get_password_hash
 from app.websocket.socket import websocket_endpoint
 
 
+from app.database import engine
 
 # =========================
 # CREATE APP FIRST ✅
@@ -72,7 +73,7 @@ print("QR_DIR =", QR_DIR)
 # =========================
 
 
-Shipment.__table__.drop(engine)
+
 
 Base.metadata.create_all(bind=engine)
 
@@ -184,6 +185,30 @@ app.include_router(driver_router, prefix="/driver")
 app.include_router(payment_router, prefix="/payment")
 
 
+
+def fix_columns():
+    with engine.connect() as conn:
+        try:
+            conn.execute(text("ALTER TABLE shipments ADD COLUMN pickup_lat FLOAT"))
+        except:
+            pass
+
+        try:
+            conn.execute(text("ALTER TABLE shipments ADD COLUMN pickup_lng FLOAT"))
+        except:
+            pass
+
+        try:
+            conn.execute(text("ALTER TABLE shipments ADD COLUMN drop_lat FLOAT"))
+        except:
+            pass
+
+        try:
+            conn.execute(text("ALTER TABLE shipments ADD COLUMN drop_lng FLOAT"))
+        except:
+            pass
+
+        conn.commit()
 # =========================
 # ROOT
 # =========================
