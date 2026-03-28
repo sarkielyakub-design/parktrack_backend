@@ -45,3 +45,10 @@ class Shipment(Base):
     payment_status = Column(String, default="pending")
     payment_method = Column(String, default="")
     payment_ref = Column(String, nullable=True)
+    
+    
+    pickup_lat = Column(Float, nullable=True)
+    pickup_lng = Column(Float, nullable=True)
+
+    drop_lat = Column(Float, nullable=True)
+    drop_lng = Column(Float, nullable=True)
