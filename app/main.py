@@ -185,6 +185,7 @@ app.include_router(driver_router, prefix="/driver")
 app.include_router(payment_router, prefix="/payment")
 
 
+from sqlalchemy import text
 
 def fix_columns():
     with engine.connect() as conn:
@@ -209,6 +210,10 @@ def fix_columns():
             pass
 
         conn.commit()
+        @app.on_event("startup")
+        def startup_event():
+         fix_columns()
+
 # =========================
 # ROOT
 # =========================
