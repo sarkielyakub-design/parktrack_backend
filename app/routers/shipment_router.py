@@ -84,7 +84,35 @@ def send_whatsapp(phone, message):
 
     return True
 
+# 🔼 TOP OF FILE (very important)
 
+
+def get_lat_lng(address):
+    url = "https://nominatim.openstreetmap.org/search"
+
+    params = {
+        "q": f"{address}, Nigeria",  # ✅ force Nigeria
+        "format": "json",
+        "limit": 1
+    }
+
+    try:
+        res = requests.get(
+            url,
+            params=params,
+            headers={"User-Agent": "ztech-app"},
+            timeout=5
+        )
+
+        data = res.json()
+
+        if data:
+            return float(data[0]["lat"]), float(data[0]["lon"])
+
+    except Exception as e:
+        print("Geocode error:", e)
+
+    return None, None
 # =========================
 # CREATE
 # =========================
@@ -97,10 +125,17 @@ def create_shipment(
     tracking_id = generate_tracking()
     otp = generate_otp()
 
+    from_city = data.get("from_city")
+    to_city = data.get("to_city")
+
+    # ✅ AUTO GET LAT LNG
+    pickup_lat, pickup_lng = get_lat_lng(from_city)
+    drop_lat, drop_lng = get_lat_lng(to_city)
+
     shipment = Shipment(
         tracking_id=tracking_id,
         status="created",
-        location=data.get("location"),
+        location=from_city,
 
         sender_name=data.get("sender_name"),
         sender_phone=data.get("sender_phone"),
@@ -108,8 +143,8 @@ def create_shipment(
         receiver_name=data.get("receiver_name"),
         receiver_phone=data.get("receiver_phone"),
 
-        from_city=data.get("from_city"),
-        to_city=data.get("to_city"),
+        from_city=from_city,
+        to_city=to_city,
 
         note=data.get("note"),
 
@@ -118,41 +153,38 @@ def create_shipment(
 
         payment_status="pending",
         payment_method="",
+
+        # ✅ SAVE COORDINATES
+        pickup_lat=pickup_lat,
+        pickup_lng=pickup_lng,
+        drop_lat=drop_lat,
+        drop_lng=drop_lng,
     )
 
     db.add(shipment)
     db.commit()
     db.refresh(shipment)
 
-    # HISTORY
-
+    # HISTORY (use pickup first)
     history = ShipmentHistory(
         shipment_id=shipment.id,
         tracking_id=tracking_id,
         status="created",
-        location=data.get("location"),
-        lat=data.get("lat"),
-        lng=data.get("lng"),
+        location=from_city,
+        lat=pickup_lat,
+        lng=pickup_lng,
     )
 
     db.add(history)
     db.commit()
 
     # QR
-
-    qr_file = generate_qr(
-        tracking_id,
-        tracking_id
-    )
+    qr_file = generate_qr(tracking_id, tracking_id)
 
     # BARCODE
-
-    barcode_file = generate_barcode(
-        tracking_id
-    )
+    barcode_file = generate_barcode(tracking_id)
 
     # LABEL
-
     label_file = generate_label(
         shipment,
         qr_file,
@@ -160,7 +192,6 @@ def create_shipment(
     )
 
     # URL
-
     qr_url = f"/qr/{tracking_id}.png"
     barcode_url = f"/barcodes/{tracking_id}.png"
     label_url = f"/labels/{tracking_id}.pdf"
@@ -172,12 +203,12 @@ def create_shipment(
     db.commit()
     db.refresh(shipment)
 
-    print("QR:", qr_file)
-    print("BARCODE:", barcode_file)
-    print("LABEL:", label_file)
-
     return {
         "tracking_id": tracking_id,
+        "pickup_lat": pickup_lat,
+        "pickup_lng": pickup_lng,
+        "drop_lat": drop_lat,
+        "drop_lng": drop_lng,
         "qr": qr_url,
         "barcode": barcode_url,
         "label": label_url,
