@@ -1,3 +1,4 @@
+from app.models.shipment import Shipment
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.staticfiles import StaticFiles
@@ -69,6 +70,9 @@ print("QR_DIR =", QR_DIR)
 # =========================
 # CREATE TABLES
 # =========================
+
+
+Shipment.__table__.drop(engine)
 
 Base.metadata.create_all(bind=engine)
 
