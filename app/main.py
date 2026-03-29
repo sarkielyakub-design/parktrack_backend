@@ -21,7 +21,7 @@ from app.utils.hashing import get_password_hash
 from app.websocket.socket import websocket_endpoint
 
 
-from app.database import engine
+
 
 # =========================
 # CREATE APP FIRST ✅
@@ -185,7 +185,7 @@ app.include_router(driver_router, prefix="/driver")
 app.include_router(payment_router, prefix="/payment")
 
 
-from sqlalchemy import text
+
 
 def fix_columns():
     with engine.connect() as conn:
