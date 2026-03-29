@@ -187,29 +187,32 @@ app.include_router(payment_router, prefix="/payment")
 
 
 
+
 def fix_columns():
-    with engine.connect() as conn:
+    with engine.begin() as conn:  # ✅ IMPORTANT (AUTOCOMMIT)
+
         try:
             conn.execute(text("ALTER TABLE shipments ADD COLUMN pickup_lat FLOAT"))
-        except:
-            pass
+        except Exception as e:
+            print("pickup_lat exists:", e)
 
         try:
             conn.execute(text("ALTER TABLE shipments ADD COLUMN pickup_lng FLOAT"))
-        except:
-            pass
+        except Exception as e:
+            print("pickup_lng exists:", e)
 
         try:
             conn.execute(text("ALTER TABLE shipments ADD COLUMN drop_lat FLOAT"))
-        except:
-            pass
+        except Exception as e:
+            print("drop_lat exists:", e)
 
         try:
             conn.execute(text("ALTER TABLE shipments ADD COLUMN drop_lng FLOAT"))
-        except:
-            pass
-
-        conn.commit()
+        except Exception as e:
+            
+          print("drop_lng exists:", e)
+        
+        
         @app.on_event("startup")
         def startup_event():
          fix_columns()
