@@ -1,4 +1,3 @@
-from app.models.shipment import Shipment
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.staticfiles import StaticFiles
@@ -9,6 +8,7 @@ from sqlalchemy import text
 import os
 
 from app.database.database import Base, engine, SessionLocal
+from app.models.shipment import Shipment
 from app.models.models import User
 
 from app.routers.auth_router import router as auth_router
@@ -21,10 +21,8 @@ from app.utils.hashing import get_password_hash
 from app.websocket.socket import websocket_endpoint
 
 
-
-
 # =========================
-# CREATE APP FIRST ✅
+# CREATE APP
 # =========================
 
 app = FastAPI(
@@ -34,7 +32,7 @@ app = FastAPI(
 
 
 # =========================
-# CORS (ONLY ONCE)
+# CORS
 # =========================
 
 app.add_middleware(
@@ -46,16 +44,13 @@ app.add_middleware(
 )
 
 app.websocket("/ws/{tracking_id}")(websocket_endpoint)
+
+
 # =========================
-# BASE DIR (RENDER SAFE)
+# BASE DIR
 # =========================
 
-BASE_DIR = os.path.abspath(
-    os.path.join(
-        os.path.dirname(__file__),
-        ".."
-    )
-)
+BASE_DIR = os.path.abspath(os.path.join(os.path.dirname(__file__), ".."))
 
 LABEL_DIR = os.path.join(BASE_DIR, "labels")
 QR_DIR = os.path.join(BASE_DIR, "qr_codes")
@@ -64,35 +59,52 @@ PROOF_DIR = os.path.join(BASE_DIR, "proof")
 SIGN_DIR = os.path.join(BASE_DIR, "sign")
 
 
-print("BASE_DIR =", BASE_DIR)
-print("QR_DIR =", QR_DIR)
-
-
 # =========================
 # CREATE TABLES
 # =========================
-
-
-
 
 Base.metadata.create_all(bind=engine)
 
 
 # =========================
-# FIX driver_id COLUMN
+# FIX DATABASE COLUMNS (🔥 IMPORTANT)
 # =========================
 
-try:
-    with engine.connect() as conn:
-        conn.execute(
-            text(
-                "ALTER TABLE shipments ADD COLUMN driver_id INTEGER"
-            )
-        )
-        conn.commit()
-        print("driver_id column added")
-except Exception as e:
-    print("driver_id exists or error:", e)
+def fix_columns():
+    print("🚀 Fixing database columns...")
+
+    with engine.begin() as conn:
+
+        conn.execute(text("""
+        ALTER TABLE shipments 
+        ADD COLUMN IF NOT EXISTS driver_id INTEGER;
+        """))
+
+        conn.execute(text("""
+        ALTER TABLE shipments 
+        ADD COLUMN IF NOT EXISTS pickup_lat DOUBLE PRECISION;
+        """))
+
+        conn.execute(text("""
+        ALTER TABLE shipments 
+        ADD COLUMN IF NOT EXISTS pickup_lng DOUBLE PRECISION;
+        """))
+
+        conn.execute(text("""
+        ALTER TABLE shipments 
+        ADD COLUMN IF NOT EXISTS drop_lat DOUBLE PRECISION;
+        """))
+
+        conn.execute(text("""
+        ALTER TABLE shipments 
+        ADD COLUMN IF NOT EXISTS drop_lng DOUBLE PRECISION;
+        """))
+
+    print("✅ Database ready")
+
+
+# 🔥 RUN IMMEDIATELY BEFORE ANY REQUEST
+fix_columns()
 
 
 # =========================
@@ -100,7 +112,6 @@ except Exception as e:
 # =========================
 
 def create_admin():
-
     db: Session = SessionLocal()
 
     admin = db.query(User).filter(
@@ -108,7 +119,6 @@ def create_admin():
     ).first()
 
     if not admin:
-
         hashed = get_password_hash("1234")
 
         new_admin = User(
@@ -119,7 +129,6 @@ def create_admin():
 
         db.add(new_admin)
         db.commit()
-
         print("Admin created")
 
     db.close()
@@ -143,35 +152,11 @@ os.makedirs(SIGN_DIR, exist_ok=True)
 # STATIC FILES
 # =========================
 
-app.mount(
-    "/labels",
-    StaticFiles(directory=LABEL_DIR),
-    name="labels",
-)
-
-app.mount(
-    "/qr",
-    StaticFiles(directory=QR_DIR),
-    name="qr",
-)
-
-app.mount(
-    "/barcodes",
-    StaticFiles(directory=BARCODE_DIR),
-    name="barcodes",
-)
-
-app.mount(
-    "/proof",
-    StaticFiles(directory=PROOF_DIR),
-    name="proof",
-)
-
-app.mount(
-    "/sign",
-    StaticFiles(directory=SIGN_DIR),
-    name="sign",
-)
+app.mount("/labels", StaticFiles(directory=LABEL_DIR), name="labels")
+app.mount("/qr", StaticFiles(directory=QR_DIR), name="qr")
+app.mount("/barcodes", StaticFiles(directory=BARCODE_DIR), name="barcodes")
+app.mount("/proof", StaticFiles(directory=PROOF_DIR), name="proof")
+app.mount("/sign", StaticFiles(directory=SIGN_DIR), name="sign")
 
 
 # =========================
@@ -184,35 +169,6 @@ app.include_router(tracking_router, prefix="/tracking")
 app.include_router(driver_router, prefix="/driver")
 app.include_router(payment_router, prefix="/payment")
 
-
-
-
-
-def fix_columns():
-    with engine.begin() as conn:
-
-        conn.execute(text("""
-        ALTER TABLE shipments 
-        ADD COLUMN IF NOT EXISTS pickup_lat FLOAT;
-        """))
-
-        conn.execute(text("""
-        ALTER TABLE shipments 
-        ADD COLUMN IF NOT EXISTS pickup_lng FLOAT;
-        """))
-
-        conn.execute(text("""
-        ALTER TABLE shipments 
-        ADD COLUMN IF NOT EXISTS drop_lat FLOAT;
-        """))
-
-        conn.execute(text("""
-        ALTER TABLE shipments 
-        ADD COLUMN IF NOT EXISTS drop_lng FLOAT;
-        """))
-        @app.on_event("startup")
-        def startup_event():
-         fix_columns()
 
 # =========================
 # ROOT
